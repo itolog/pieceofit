@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // Nothing of ours imports the stub - it exists only so ink's own import
+  // resolves at bundle time.
+  "ignore": ["stubs/**"],
+  "ignoreExportsUsedInFile": {
+    "type": true
+  },
+  // Only referenced from .oxlintrc.json's "extends" (a config-file path, not a
+  // JS import), so knip's static analysis can't see the usage.
+  "ignoreDependencies": ["@repo/oxlint-config"]
+}

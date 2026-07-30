@@ -5,13 +5,11 @@
   "description": "Shared oxlint configurations for the monorepo",
   "files": [
     "base.json",
-    "react.json",
-    "next.json"
+    "react.json"
   ],
   "exports": {
     "./base": "./base.json",
-    "./react": "./react.json",
-    "./next": "./next.json"
+    "./react": "./react.json"
   },
   "devDependencies": {
     "oxlint": "catalog:"

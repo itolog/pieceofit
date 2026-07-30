@@ -10,7 +10,7 @@
       "concurrently": "10.0.4",
       "oxfmt": "0.61.0",
       "oxlint": "1.76.0",
-      "typescript": "5.9.2"
+      "typescript": "7.0.2"
     }
   },
   "scripts": {
@@ -20,6 +20,7 @@
     "fix:lint": "turbo run fix:lint",
     "format": "turbo run format",
     "check-types": "turbo run check-types",
+    "test": "turbo run test",
     "deps:audit": "bun audit",
     "deps:update": "bun update -i",
     "deps:reinstall": "rm -rf node_modules bun.lock && bun install"

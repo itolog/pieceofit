@@ -1,0 +1,548 @@
+// @vitest-environment happy-dom
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { OLLAMA_UNREACHABLE_NOTICE } from "@/models/ollama-notice.model";
+
+import { UseChatOptions } from "./use-chat.type";
+
+// Shared mocks, hoisted so the vi.mock factories below can close over them.
+const {
+  mockExit,
+  mockTranslate,
+  mockCheckModel,
+  mockSetModel,
+  mockSetTemp,
+  mockListModels,
+  mockResolveStartup,
+} = vi.hoisted(() => ({
+  mockExit: vi.fn(),
+  mockTranslate: vi.fn(),
+  mockCheckModel: vi.fn(),
+  mockSetModel: vi.fn(),
+  mockSetTemp: vi.fn(),
+  mockListModels: vi.fn(),
+  mockResolveStartup: vi.fn(),
+}));
+
+vi.mock("ink", () => ({ useApp: () => ({ exit: mockExit }) }));
+// The service encapsulates the chain, timeout, retry and cleaning; the hook
+// only orchestrates messages, so we mock the service surface directly.
+vi.mock("@/services/llm-model", () => ({
+  llmModelService: {
+    translate: mockTranslate,
+    checkModelAvailable: mockCheckModel,
+    setModel: mockSetModel,
+    setTemperature: mockSetTemp,
+    listModels: mockListModels,
+    resolveStartupModel: mockResolveStartup,
+    // External-store surface read via useSyncExternalStore (useModel).
+    subscribe: () => () => {},
+    getModel: () => "gemma4:12b-mlx",
+    getTemperature: () => 0.1,
+  },
+}));
+
+import { useChat } from "./use-chat.hook";
+
+function setup(overrides: Partial<UseChatOptions> = {}) {
+  const setFromLang = vi.fn();
+  const setToLang = vi.fn();
+  const options: UseChatOptions = {
+    fromLang: "english",
+    toLang: "polish",
+    setFromLang,
+    setToLang,
+    ...overrides,
+  };
+  const utils = renderHook(() => useChat(options));
+  return { ...utils, setFromLang, setToLang };
+}
+
+// Drive one submit: set the input, then call submit.
+async function submitText(
+  result: { current: ReturnType<typeof useChat> },
+  text: string,
+) {
+  act(() => result.current.setInput(text));
+  await act(async () => {
+    await result.current.submit();
+  });
+}
+
+const texts = (result: { current: ReturnType<typeof useChat> }) =>
+  result.current.messages.map((m) => m.text);
+
+const fakeStats = {
+  elapsedMs: 100,
+  promptTokens: 1,
+  completionTokens: 2,
+  totalTokens: 3,
+  tokensPerSecond: 20,
+};
+
+// The service now returns { text, stats }; helper to build that shape.
+const translationResult = (text: string) => ({ text, stats: fakeStats });
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mockCheckModel.mockResolvedValue({ status: "available" });
+  mockResolveStartup.mockResolvedValue({ status: "ok" });
+});
+
+describe("useChat", () => {
+  it("starts with a single welcome message and not loading", () => {
+    const { result } = setup();
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0]?.role).toBe("Bot");
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("translates: adds the user line and the bot reply", async () => {
+    mockTranslate.mockResolvedValue(translationResult("bonjour"));
+    const { result } = setup();
+
+    await submitText(result, "hello");
+
+    expect(mockTranslate).toHaveBeenCalledTimes(1);
+    expect(mockTranslate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "hello",
+        fromLang: "english",
+        toLang: "polish",
+        signal: expect.anything(),
+      }),
+    );
+    expect(texts(result)).toContain("hello");
+    expect(texts(result)).toContain("bonjour");
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("fills the bot message in live as tokens stream", async () => {
+    mockTranslate.mockImplementation(
+      async ({ onToken }: { onToken?: (partial: string) => void }) => {
+        onToken?.("Bon");
+        onToken?.("Bonjour");
+        return translationResult("Bonjour");
+      },
+    );
+    const { result } = setup();
+
+    await submitText(result, "hello");
+
+    // one You line + one Bot line (updated in place, not appended per token)
+    expect(
+      result.current.messages.filter((m) => m.role === "Bot"),
+    ).toHaveLength(
+      2, // welcome + the streamed reply
+    );
+    expect(texts(result)).toContain("Bonjour");
+  });
+
+  it("exposes the translation stats after a successful translation", async () => {
+    mockTranslate.mockResolvedValue(translationResult("bonjour"));
+    const { result } = setup();
+
+    expect(result.current.stats).toBeNull();
+
+    await submitText(result, "hello");
+
+    expect(result.current.stats).toMatchObject(fakeStats);
+  });
+
+  it("shows a neutral message when the request is aborted", async () => {
+    const abortError = Object.assign(new Error("aborted"), {
+      name: "AbortError",
+    });
+    mockTranslate.mockRejectedValue(abortError);
+    const { result } = setup();
+
+    await submitText(result, "hello");
+
+    expect(texts(result)).toContain("Request cancelled");
+  });
+
+  it("surfaces a generic error as an Error message", async () => {
+    mockTranslate.mockRejectedValue(new Error("boom"));
+    const { result } = setup();
+
+    await submitText(result, "hello");
+
+    expect(texts(result)).toContain("Error: boom");
+  });
+
+  it("clears history back to the welcome message via /clear", async () => {
+    mockTranslate.mockResolvedValue(translationResult("bonjour"));
+    const { result } = setup();
+
+    await submitText(result, "hello");
+    expect(result.current.messages.length).toBeGreaterThan(1);
+
+    await submitText(result, "/clear");
+    expect(result.current.messages).toHaveLength(1);
+    expect(mockTranslate).toHaveBeenCalledTimes(1); // /clear is not sent to the LLM
+  });
+
+  it("/clear also resets the translation stats", async () => {
+    mockTranslate.mockResolvedValue(translationResult("bonjour"));
+    const { result } = setup();
+
+    await submitText(result, "hello");
+    expect(result.current.stats).toMatchObject(fakeStats);
+
+    await submitText(result, "/clear");
+    expect(result.current.stats).toBeNull();
+  });
+
+  it("routes /from to setFromLang and never calls the LLM", async () => {
+    const { result, setFromLang } = setup();
+
+    await submitText(result, "/from german");
+
+    expect(setFromLang).toHaveBeenCalledWith("german");
+    expect(mockTranslate).not.toHaveBeenCalled();
+    expect(texts(result)).toContain("Source language changed to: german");
+  });
+
+  it("routes /to to setToLang", async () => {
+    const { result, setToLang } = setup();
+
+    await submitText(result, "/to spanish");
+
+    expect(setToLang).toHaveBeenCalledWith("spanish");
+    expect(texts(result)).toContain("Target language changed to: spanish");
+  });
+
+  it("routes /model to the service and re-checks availability", async () => {
+    const { result } = setup();
+    mockCheckModel.mockClear(); // ignore the mount-time check
+
+    await submitText(result, "/model llama3");
+
+    expect(mockSetModel).toHaveBeenCalledWith("llama3");
+    expect(mockCheckModel).toHaveBeenCalledTimes(1); // re-verified after switch
+    expect(mockTranslate).not.toHaveBeenCalled();
+    expect(texts(result)).toContain("Model changed to: llama3");
+  });
+
+  it("opens the model picker on bare /model, then applies a selection", async () => {
+    mockListModels.mockResolvedValue({
+      status: "ok",
+      models: ["gemma3:4b", "llama3"],
+    });
+    const { result } = setup();
+    mockCheckModel.mockClear(); // ignore the mount-time check
+
+    await submitText(result, "/model");
+
+    expect(mockListModels).toHaveBeenCalledTimes(1);
+    expect(result.current.modelItems).toEqual(["gemma3:4b", "llama3"]);
+    expect(mockSetModel).not.toHaveBeenCalled(); // nothing applied yet
+
+    await act(async () => {
+      await result.current.selectModel("llama3");
+    });
+
+    expect(mockSetModel).toHaveBeenCalledWith("llama3");
+    expect(mockCheckModel).toHaveBeenCalledTimes(1); // re-verified after switch
+    expect(result.current.modelItems).toBeNull(); // picker closed
+    expect(texts(result)).toContain("Model changed to: llama3");
+  });
+
+  it("cancelModelPicker closes the picker without applying a model", async () => {
+    mockListModels.mockResolvedValue({
+      status: "ok",
+      models: ["gemma3:4b"],
+    });
+    const { result } = setup();
+
+    await submitText(result, "/model");
+    expect(result.current.modelItems).toEqual(["gemma3:4b"]);
+
+    act(() => result.current.cancelModelPicker());
+
+    expect(result.current.modelItems).toBeNull();
+    expect(mockSetModel).not.toHaveBeenCalled();
+  });
+
+  it("reports when no models are installed instead of opening the picker", async () => {
+    mockListModels.mockResolvedValue({ status: "ok", models: [] });
+    const { result } = setup();
+
+    await submitText(result, "/model");
+
+    expect(result.current.modelItems).toBeNull();
+    expect(texts(result).some((t) => t.includes("No models found"))).toBe(true);
+  });
+
+  it("routes /temp <value> to the service", async () => {
+    const { result } = setup();
+
+    await submitText(result, "/temp 0.7");
+
+    expect(mockSetTemp).toHaveBeenCalledWith(0.7);
+    expect(mockTranslate).not.toHaveBeenCalled();
+    expect(texts(result)).toContain("Temperature changed to: 0.7");
+  });
+
+  it("opens the temp stepper on bare /temp, then applies a selection", async () => {
+    const { result } = setup();
+
+    await submitText(result, "/temp");
+
+    expect(result.current.tempPickerOpen).toBe(true);
+    expect(mockSetTemp).not.toHaveBeenCalled(); // nothing applied yet
+
+    act(() => result.current.selectTemp(1.2));
+
+    expect(mockSetTemp).toHaveBeenCalledWith(1.2);
+    expect(result.current.tempPickerOpen).toBe(false); // stepper closed
+    expect(texts(result)).toContain("Temperature changed to: 1.2");
+  });
+
+  it("cancelTempPicker closes the stepper without applying a temperature", async () => {
+    const { result } = setup();
+
+    await submitText(result, "/temp");
+    expect(result.current.tempPickerOpen).toBe(true);
+
+    act(() => result.current.cancelTempPicker());
+
+    expect(result.current.tempPickerOpen).toBe(false);
+    expect(mockSetTemp).not.toHaveBeenCalled();
+  });
+
+  it("quits on /exit", async () => {
+    const { result } = setup();
+
+    await submitText(result, "/exit");
+
+    expect(mockExit).toHaveBeenCalledTimes(1);
+  });
+
+  it("guides the user and blocks translation when no models are installed", async () => {
+    mockResolveStartup.mockResolvedValue({ status: "no-models" });
+    mockCheckModel.mockResolvedValue({ status: "missing" }); // still nothing pulled
+    const { result } = setup();
+
+    // the instruction is appended after the welcome message, not replacing it
+    await waitFor(() =>
+      expect(
+        texts(result).some((t) => t.includes("No models are installed")),
+      ).toBe(true),
+    );
+    expect(result.current.messages[0]?.text).toContain("Hello! I am a TUI");
+
+    await submitText(result, "hello");
+
+    expect(mockTranslate).not.toHaveBeenCalled();
+    expect(texts(result).some((t) => t.includes("is not available"))).toBe(
+      true,
+    );
+  });
+
+  it("un-blocks itself once Ollama comes up after a blocked start", async () => {
+    // The usual order is "open the TUI, then start Ollama": the block set at
+    // mount must not outlive the problem.
+    mockResolveStartup.mockResolvedValue({ status: "unreachable" });
+    mockCheckModel.mockResolvedValue({ status: "missing" });
+    mockTranslate.mockResolvedValue(translationResult("bonjour"));
+    const { result } = setup();
+
+    await waitFor(() =>
+      expect(texts(result)).toContain(OLLAMA_UNREACHABLE_NOTICE),
+    );
+    await submitText(result, "/model gemma3:4b"); // verify says "missing" → blocked
+    await submitText(result, "hello");
+    expect(mockTranslate).not.toHaveBeenCalled();
+
+    // user runs `ollama serve` / pulls the model, then just sends again
+    mockCheckModel.mockResolvedValue({ status: "available" });
+    await submitText(result, "hello");
+
+    expect(mockTranslate).toHaveBeenCalledTimes(1);
+    expect(texts(result)).toContain("bonjour");
+  });
+
+  it("falls back to an installed model when the preferred one is missing", async () => {
+    mockResolveStartup.mockResolvedValue({
+      status: "fallback",
+      model: "llama3",
+    });
+    mockTranslate.mockResolvedValue(translationResult("bonjour"));
+    const { result } = setup();
+
+    await waitFor(() =>
+      expect(
+        texts(result).some((t) => t.includes('switched to "llama3"')),
+      ).toBe(true),
+    );
+    expect(mockSetModel).toHaveBeenCalledWith("llama3"); // service switched
+
+    // translation is not blocked — the fallback model is usable
+    await submitText(result, "hello");
+    expect(mockTranslate).toHaveBeenCalledTimes(1);
+  });
+
+  // Starts a translation that stays in flight until the returned `resolve` is
+  // called, so submits during loading can be exercised.
+  async function startPendingTranslation(
+    result: { current: ReturnType<typeof useChat> },
+    text = "hello",
+  ) {
+    let resolve!: (value: ReturnType<typeof translationResult>) => void;
+    mockTranslate.mockReturnValue(
+      new Promise((res) => {
+        resolve = res;
+      }),
+    );
+
+    let submitted!: Promise<void>;
+    act(() => result.current.setInput(text));
+    await act(async () => {
+      submitted = result.current.submit();
+    });
+    expect(result.current.isLoading).toBe(true);
+
+    return async () => {
+      await act(async () => {
+        resolve(translationResult("bonjour"));
+        await submitted;
+      });
+    };
+  }
+
+  it("does not start a second translation while one is in flight", async () => {
+    const { result } = setup();
+    const finish = await startPendingTranslation(result);
+
+    await submitText(result, "world");
+
+    expect(mockTranslate).toHaveBeenCalledTimes(1);
+    // input is preserved so the user can stop the running request and resubmit
+    expect(result.current.input).toBe("world");
+    // and the blocked submit is never silent
+    expect(texts(result).some((t) => t.includes("press Esc to stop it"))).toBe(
+      true,
+    );
+
+    await finish();
+  });
+
+  it("cancelTranslation aborts the running request and marks the card", async () => {
+    // signal-aware mock: the service rejects with AbortError once aborted
+    mockTranslate.mockImplementation(
+      ({ signal }: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener("abort", () =>
+            reject(Object.assign(new Error("aborted"), { name: "AbortError" })),
+          );
+        }),
+    );
+    const { result } = setup();
+
+    let submitted!: Promise<void>;
+    act(() => result.current.setInput("hello"));
+    await act(async () => {
+      submitted = result.current.submit();
+    });
+    expect(result.current.isLoading).toBe(true);
+
+    await act(async () => {
+      result.current.cancelTranslation();
+      await submitted;
+    });
+
+    expect(texts(result)).toContain("Request cancelled");
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("cancelTranslation is a no-op when nothing is running", async () => {
+    const { result } = setup();
+
+    act(() => result.current.cancelTranslation());
+
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("still runs pure commands while a translation is in flight", async () => {
+    const { result } = setup();
+    const finish = await startPendingTranslation(result);
+
+    await submitText(result, "/help");
+    await submitText(result, "/exit");
+
+    expect(texts(result).length).toBeGreaterThan(0);
+    expect(mockExit).toHaveBeenCalledTimes(1);
+    expect(mockTranslate).toHaveBeenCalledTimes(1);
+
+    await finish();
+  });
+
+  it("applies /model while a translation is in flight and lets it finish", async () => {
+    const { result } = setup();
+    const finish = await startPendingTranslation(result);
+    mockCheckModel.mockClear(); // ignore the mount-time check
+
+    await submitText(result, "/model llama3");
+
+    expect(mockSetModel).toHaveBeenCalledWith("llama3");
+    expect(mockCheckModel).toHaveBeenCalledTimes(1); // re-verified mid-flight
+    expect(result.current.isLoading).toBe(true); // running request not aborted
+
+    await finish();
+
+    expect(texts(result)).toContain("bonjour"); // finished on the old chain
+  });
+
+  it("ignores empty input", async () => {
+    const { result } = setup();
+
+    await submitText(result, "   ");
+
+    expect(result.current.messages).toHaveLength(1);
+    expect(mockTranslate).not.toHaveBeenCalled();
+  });
+
+  // D1: the only submit allowed to be silent is an empty one — everything else
+  // must leave a trace in the transcript or visibly change the UI.
+  it("answers an unknown command instead of swallowing it", async () => {
+    const { result } = setup();
+
+    await submitText(result, "/nope");
+
+    expect(texts(result).some((t) => t.includes("Unknown command"))).toBe(true);
+    expect(mockTranslate).not.toHaveBeenCalled();
+  });
+
+  it("reports an unreachable Ollama instead of a missing model", async () => {
+    mockListModels.mockResolvedValue({ status: "unreachable" });
+    const { result } = setup();
+
+    await submitText(result, "/model");
+
+    expect(result.current.modelItems).toBeNull();
+    const said = texts(result);
+    expect(said).toContain(OLLAMA_UNREACHABLE_NOTICE);
+    expect(said.some((t) => t.includes("No models found"))).toBe(false);
+  });
+
+  it("reports an unreachable Ollama at startup instead of blaming the models", async () => {
+    mockResolveStartup.mockResolvedValue({ status: "unreachable" });
+    mockTranslate.mockResolvedValue(translationResult("bonjour"));
+    const { result } = setup();
+
+    await waitFor(() =>
+      expect(texts(result)).toContain(OLLAMA_UNREACHABLE_NOTICE),
+    );
+    expect(
+      texts(result).some((t) => t.includes("No models are installed")),
+    ).toBe(false);
+
+    // Availability stayed unknown, so a submit is still attempted rather than
+    // being blocked for the rest of the session.
+    await submitText(result, "hello");
+    expect(mockTranslate).toHaveBeenCalledTimes(1);
+  });
+});

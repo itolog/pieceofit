@@ -16,11 +16,9 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-- `@repo/oxlint-config`: shared [oxlint](https://oxc.rs/) configs (`base`, `react`, `next`)
+- `llm-translator`: a terminal translation app ([Ink](https://term.ink/) + LangChain + Ollama) run by [Bun](https://bun.sh/)
+- `@repo/typescript-config`: `tsconfig.json` presets (`base`, `bun`, `react`, `library`)
+- `@repo/oxlint-config`: shared [oxlint](https://oxc.rs/) configs (`base`, `react`)
 - `@repo/oxfmt-config`: shared [oxfmt](https://oxc.rs/) formatting + import-sorting config
 
 Tooling lives in the packages that use it, not at the root: each app/package
@@ -127,15 +125,15 @@ You can build a specific package by using a [filter](https://turborepo.dev/docs/
 With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
 
 ```sh
-turbo build --filter=docs
+turbo build --filter=llm-translator
 ```
 
 Without global `turbo`:
 
 ```sh
-npx turbo build --filter=docs
-bun exec turbo build --filter=docs
-bun exec turbo build --filter=docs
+npx turbo build --filter=llm-translator
+bun exec turbo build --filter=llm-translator
+bun exec turbo build --filter=llm-translator
 ```
 
 ### Develop
@@ -163,15 +161,15 @@ You can develop a specific package by using a [filter](https://turborepo.dev/doc
 With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
 
 ```sh
-turbo dev --filter=web
+turbo dev --filter=llm-translator
 ```
 
 Without global `turbo`:
 
 ```sh
-npx turbo dev --filter=web
-bun exec turbo dev --filter=web
-bun exec turbo dev --filter=web
+npx turbo dev --filter=llm-translator
+bun exec turbo dev --filter=llm-translator
+bun exec turbo dev --filter=llm-translator
 ```
 
 ### Remote Caching

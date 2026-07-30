@@ -4,9 +4,8 @@ Shared [oxlint](https://oxc.rs/docs/guide/usage/linter) configurations.
 
 | Config       | Adds                                                        |
 | ------------ | ----------------------------------------------------------- |
-| `base.json`  | `typescript`, `unicorn`, `oxc`, `import`, `import/no-cycle`  |
+| `base.json`  | `typescript`, `unicorn`, `oxc`, `import`, `import/no-cycle` |
 | `react.json` | `base` + `react`, `react-perf`, `jsx-a11y`, `react-hooks/*` |
-| `next.json`  | `react` + `nextjs`                                          |
 
 ## Usage
 

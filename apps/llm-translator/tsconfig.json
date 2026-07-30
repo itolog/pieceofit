@@ -1,0 +1,12 @@
+{
+  "extends": "@repo/typescript-config/bun.json",
+  "compilerOptions": {
+    // Ink uses React but not the new JSX transform - keep the classic runtime.
+    "jsx": "react",
+    "rootDir": "./src",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}
