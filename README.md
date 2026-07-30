@@ -19,18 +19,88 @@ This Turborepo includes the following packages/apps:
 - `docs`: a [Next.js](https://nextjs.org/) app
 - `web`: another [Next.js](https://nextjs.org/) app
 - `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `@repo/oxlint-config`: shared [oxlint](https://oxc.rs/) configs (`base`, `react`, `next`)
+- `@repo/oxfmt-config`: shared [oxfmt](https://oxc.rs/) formatting + import-sorting config
+
+Tooling lives in the packages that use it, not at the root: each app/package
+declares `oxlint`, `oxfmt`, `typescript` (all `catalog:`) plus the shared config
+packages it needs, and exposes `lint` / `format` / `check-types` scripts. The root
+only holds `turbo`, which orchestrates them.
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+
+### Shared dependency versions
+
+`oxlint`, `oxfmt`, `typescript` and `concurrently` are pinned once in the
+[Bun catalog](https://bun.com/docs/pm/catalogs) under `workspaces.catalog` in the
+root `package.json`. Packages depend on them with the catalog protocol, so a
+version bump happens in one place:
+
+```json
+{
+  "devDependencies": {
+    "oxlint": "catalog:"
+  }
+}
+```
 
 ### Utilities
 
 This Turborepo has some additional tools already setup for you:
 
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- [oxlint](https://oxc.rs/docs/guide/usage/linter) for code linting
+- [oxfmt](https://oxc.rs/docs/guide/usage/formatter) for code formatting and import sorting
+
+### Lint & format
+
+From the root, every task fans out through turbo:
+
+```sh
+bun run lint          # turbo run lint
+bun run fix:lint      # turbo run fix:lint
+bun run format        # turbo run format
+bun run check-types   # turbo run check-types
+```
+
+An app or package wires itself up like this — `lint` runs its own `lint:*` scripts
+in parallel via `concurrently`:
+
+```json
+{
+  "scripts": {
+    "lint": "conc --timings -c \"auto\" \"bun:lint:*\"",
+    "lint:code": "oxlint",
+    "lint:format": "oxfmt --check -c ./node_modules/@repo/oxfmt-config/base.json .",
+    "lint:types": "tsc --noEmit",
+    "fix:lint": "oxlint --fix",
+    "format": "oxfmt --write -c ./node_modules/@repo/oxfmt-config/base.json ."
+  },
+  "devDependencies": {
+    "@repo/oxfmt-config": "*",
+    "@repo/oxlint-config": "*",
+    "@repo/typescript-config": "*",
+    "concurrently": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "typescript": "catalog:"
+  }
+}
+```
+
+plus its own `.oxlintrc.json`:
+
+```json
+{
+  "extends": ["../../packages/oxlint-config/react.json"],
+  "env": { "browser": true, "node": true },
+  "ignorePatterns": ["**/dist/**"]
+}
+```
+
+See the config packages' READMEs for the details (`extends` does not inherit
+`env`/`ignorePatterns`; oxfmt has no `extends` at all, hence the `-c` flag).
 
 ### Build
 
