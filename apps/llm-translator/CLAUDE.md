@@ -100,17 +100,27 @@ package`; `--define`/`--env` don't help because Bun resolves the dynamic `import
 
 ### Tooling
 
-The _what_ is in the config files (`.oxlintrc.json`, `.oxfmtrc.json`, `knip.json`,
-`lefthook.yml`) — those are strict JSON/YAML and can't hold comments, so the non-obvious
-_why_ / future-action notes live here:
+Rules and presets are shared from `packages/*` at the repo root; only the per-app wiring
+lives here, in `oxlint.config.ts` and `oxfmt.config.ts`. Both are **TypeScript** because
+that is the only config format that can import a shared config as a package rather than as
+a path into `node_modules` — and it means `tsc` type-checks them (they are in the
+`include`, which is why this package has no `rootDir`).
 
-- **Lint:** [oxlint](https://oxc.rs/) (`.oxlintrc.json`) — incl. `import/no-cycle` for
-  circular-dependency detection (auto-reads `tsconfig` for the `@/*` alias; no separate
-  madge/dpdm needed).
-- **Format:** [oxfmt](https://oxc.rs/) (`.oxfmtrc.json`) — also does import sorting via
-  `sortImports`; covers MD & YAML too.
+- **Lint:** [oxlint](https://oxc.rs/) — `oxlint.config.ts` does `extends: [react]` with the
+  preset imported from `@pieceofit/oxlint-config/react`. It declares only `env` (runtime
+  globals) and `ignorePatterns`: a top-level `env` is **not** inherited through `extends`,
+  even in a TS config, so it has to be restated per app. `import/no-cycle` comes from the
+  shared base and auto-reads `tsconfig` for the `@/*` alias — no madge/dpdm needed.
+  Note that a nested config **replaces** the repo-root one rather than merging with it, so
+  what is written here (plus what it `extends`) is exactly what applies — including when
+  oxlint is invoked from the repo root.
+- **Format:** [oxfmt](https://oxc.rs/) — `oxfmt.config.ts` spreads
+  `@pieceofit/oxfmt-config/react` (the `react` import group is the only thing that preset
+  adds over `./base`). oxfmt has no `extends` at all, and silently ignores the key if you
+  write one, so object spread is the composition mechanism — and `sortImports` is replaced
+  by a spread rather than merged, which is why the preset re-spreads the shared half.
 - **Dead code:** [knip](https://knip.dev/) (`knip.json`), run as `bun run lint:unused` (folds
   into `bun run verify`). Kept **out of pre-commit** — it resolves the whole module graph, so
   it can't run on staged files only.
-- **Git hooks:** [Lefthook](https://lefthook.dev/) (`lefthook.yml`) — pre-commit fix+format on
-  staged files, pre-push `verify` + `bun audit`.
+- **Git hooks:** none. Upstream used Lefthook, but hooks install from the repo root, so if we
+  want them they belong there, not in this package.

@@ -1,8 +1,0 @@
-{
-  "extends": ["./node_modules/@repo/oxlint-config/react.json"],
-  "env": {
-    "browser": true,
-    "node": true
-  },
-  "ignorePatterns": ["dist/**"]
-}

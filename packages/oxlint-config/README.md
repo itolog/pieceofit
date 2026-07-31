@@ -1,16 +1,29 @@
-# `@repo/oxlint-config`
+# `@pieceofit/oxlint-config`
 
-Shared [oxlint](https://oxc.rs/docs/guide/usage/linter) configurations.
+Shared [oxlint](https://oxc.rs/docs/guide/usage/linter) configurations, written
+as TypeScript configs so consumers can import them as **packages** rather than
+as file paths.
 
-| Config       | Adds                                                        |
-| ------------ | ----------------------------------------------------------- |
-| `base.json`  | `typescript`, `unicorn`, `oxc`, `import`, `import/no-cycle` |
-| `react.json` | `base` + `react`, `react-perf`, `jsx-a11y`, `react-hooks/*` |
+| Export    | Adds                                                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `./base`  | plugins `typescript`, `unicorn`, `oxc`, `import`; `correctness: error` + `suspicious: warn`; `import/no-cycle`; `es2026` |
+| `./react` | `base` + plugins `react`, `react-perf`, `jsx-a11y`; `react-hooks/*`                                                      |
 
 ## Usage
 
-Add the package plus `oxlint` itself to the consuming app or package, and drop an
-`.oxlintrc.json` next to its `package.json`:
+Add the package plus `oxlint` itself to the consuming app, and drop an
+`oxlint.config.ts` next to its `package.json`:
+
+```ts
+import { defineConfig } from "oxlint";
+import react from "@pieceofit/oxlint-config/react";
+
+export default defineConfig({
+  extends: [react],
+  env: { node: true },
+  ignorePatterns: ["dist/**"],
+});
+```
 
 ```json
 {
@@ -19,34 +32,45 @@ Add the package plus `oxlint` itself to the consuming app or package, and drop a
     "fix:lint": "oxlint --fix"
   },
   "devDependencies": {
-    "@repo/oxlint-config": "*",
+    "@pieceofit/oxlint-config": "*",
     "oxlint": "catalog:"
   }
 }
 ```
 
-```json
-{
-  "extends": ["../../packages/oxlint-config/react.json"],
-  "env": { "browser": true, "node": true },
-  "ignorePatterns": ["**/dist/**"]
-}
+## Why TypeScript and not `.oxlintrc.json`
+
+`extends` in the JSON format takes **file paths only** — package specifiers are
+rejected outright ("Oxlint does not support ESLint shared configs"), which is why
+the JSON version of this setup had to reach into
+`./node_modules/@pieceofit/oxlint-config/…`. The TS format takes imported config
+_objects_, so the shared config travels as a normal dependency. oxlint
+auto-discovers `oxlint.config.ts` and `oxlint.config.mts`.
+
+A side benefit: because the dependency is now a real import, knip sees it, so it
+no longer needs an `ignoreDependencies` entry.
+
+## What `extends` does and does not carry
+
+`plugins`, `categories`, `rules` and `overrides` all **merge** along the chain
+(later entries win on conflicts). `plugins` merges too, so `react.ts` lists only
+what it adds and still yields the full set:
+
+```
+import, jsx-a11y, oxc, react, react-perf, typescript, unicorn
 ```
 
-`extends` takes **file paths**, not package specifiers. The relative path above
-works; so does the workspace symlink Bun creates inside the consumer
-(`./node_modules/@repo/oxlint-config/react.json`).
+A **top-level `env` is not inherited** — not even in a TS config, where
+everything else does merge. Only the config oxlint actually loads is read for it.
+Inside an `overrides` entry it _does_ carry across, which is how `base.ts` shares
+the `es2026` language level. Runtime globals (`node`, `browser`) deliberately
+stay in the consumer, since they differ per app. `.gitignore` is honoured on top
+of `ignorePatterns`.
 
-oxlint also discovers nested `.oxlintrc.json` files automatically, so a config in
-a subdirectory applies to the files below it.
+## On `suspicious`
 
-## What `extends` does and does not merge
-
-`plugins`, `categories` and `rules` are merged along the `extends` chain (later
-configs win). `plugins` is _overwritten_, not appended, so every config here
-lists the full plugin set it wants.
-
-`env`, `globals` and `ignorePatterns` are **not** inherited — only the values in
-the config file oxlint actually loads take effect. Keep those in the consuming
-`.oxlintrc.json`, not here, otherwise they silently do nothing. `.gitignore` is
-honoured on top of `ignorePatterns`.
+`correctness` is the "this is a bug" tier and is an error. `suspicious` is the
+"this is probably wrong" tier and is a warning — oxlint exits non-zero only on
+errors unless you pass `--deny-warnings`, so it flags without blocking. Keep the
+count at zero anyway; a permanently warning build teaches people to ignore
+warnings.

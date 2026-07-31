@@ -57,8 +57,8 @@ export const App = () => {
 
       {match({ isLoading, stats })
         .with({ isLoading: true }, () => <LiveTimer />)
-        .with({ stats: P.nonNullable }, ({ stats }) => (
-          <StatsBar stats={stats} />
+        .with({ stats: P.nonNullable }, (matched) => (
+          <StatsBar stats={matched.stats} />
         ))
         .otherwise(() => null)}
 
@@ -73,9 +73,9 @@ export const App = () => {
       />
 
       {match({ modelItems, tempPickerOpen })
-        .with({ modelItems: P.nonNullable }, ({ modelItems }) => (
+        .with({ modelItems: P.nonNullable }, (matched) => (
           <ModelPicker
-            items={modelItems}
+            items={matched.modelItems}
             onSelect={selectModel}
             onCancel={cancelModelPicker}
           />

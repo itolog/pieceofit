@@ -17,9 +17,9 @@ This Turborepo includes the following packages/apps:
 ### Apps and Packages
 
 - `llm-translator`: a terminal translation app ([Ink](https://term.ink/) + LangChain + Ollama) run by [Bun](https://bun.sh/)
-- `@repo/typescript-config`: `tsconfig.json` presets (`base`, `bun`, `react`, `library`)
-- `@repo/oxlint-config`: shared [oxlint](https://oxc.rs/) configs (`base`, `react`)
-- `@repo/oxfmt-config`: shared [oxfmt](https://oxc.rs/) formatting + import-sorting config
+- `@pieceofit/typescript-config`: `tsconfig.json` presets (`base`, `bun`, `react`, `library`)
+- `@pieceofit/oxlint-config`: shared [oxlint](https://oxc.rs/) configs (`base`, `react`)
+- `@pieceofit/oxfmt-config`: shared [oxfmt](https://oxc.rs/) formatting + import-sorting config
 
 Tooling lives in the packages that use it, not at the root: each app/package
 declares `oxlint`, `oxfmt`, `typescript` (all `catalog:`) plus the shared config
@@ -70,15 +70,15 @@ in parallel via `concurrently`:
   "scripts": {
     "lint": "conc --timings -c \"auto\" \"bun:lint:*\"",
     "lint:code": "oxlint",
-    "lint:format": "oxfmt --check -c ./node_modules/@repo/oxfmt-config/base.json .",
+    "lint:format": "oxfmt --check .",
     "lint:types": "tsc --noEmit",
     "fix:lint": "oxlint --fix",
-    "format": "oxfmt --write -c ./node_modules/@repo/oxfmt-config/base.json ."
+    "format": "oxfmt --write ."
   },
   "devDependencies": {
-    "@repo/oxfmt-config": "*",
-    "@repo/oxlint-config": "*",
-    "@repo/typescript-config": "*",
+    "@pieceofit/oxfmt-config": "*",
+    "@pieceofit/oxlint-config": "*",
+    "@pieceofit/typescript-config": "*",
     "concurrently": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
@@ -87,18 +87,32 @@ in parallel via `concurrently`:
 }
 ```
 
-plus its own `.oxlintrc.json`:
+plus its own `oxlint.config.ts` and `oxfmt.config.ts`:
 
-```json
-{
-  "extends": ["../../packages/oxlint-config/react.json"],
-  "env": { "browser": true, "node": true },
-  "ignorePatterns": ["**/dist/**"]
-}
+```ts
+import { defineConfig } from "oxlint";
+import react from "@pieceofit/oxlint-config/react";
+
+export default defineConfig({
+  extends: [react],
+  // Runtime globals are per-app; the language level comes from the shared base.
+  env: { node: true },
+  ignorePatterns: ["dist/**"],
+});
 ```
 
-See the config packages' READMEs for the details (`extends` does not inherit
-`env`/`ignorePatterns`; oxfmt has no `extends` at all, hence the `-c` flag).
+```ts
+import { defineConfig } from "oxfmt";
+import base from "@pieceofit/oxfmt-config";
+
+export default defineConfig({ ...base });
+```
+
+Both are TypeScript on purpose: it is the only format that can import a shared
+config as a **package** instead of a path into `node_modules`. See the config
+packages' READMEs for the details (oxlint's `extends` carries `plugins`,
+`categories`, `rules` and `overrides` but not a top-level `env`; oxfmt has no
+`extends` at all, so it composes by object spread).
 
 ### Build
 

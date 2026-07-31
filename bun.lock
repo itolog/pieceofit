@@ -24,9 +24,9 @@
         "ts-pattern": "5.9.0",
       },
       "devDependencies": {
-        "@repo/oxfmt-config": "*",
-        "@repo/oxlint-config": "*",
-        "@repo/typescript-config": "*",
+        "@pieceofit/oxfmt-config": "*",
+        "@pieceofit/oxlint-config": "*",
+        "@pieceofit/typescript-config": "*",
         "@testing-library/react": "16.3.2",
         "@types/node": "26.1.1",
         "@types/react": "19.2.17",
@@ -42,21 +42,21 @@
       },
     },
     "packages/oxfmt-config": {
-      "name": "@repo/oxfmt-config",
+      "name": "@pieceofit/oxfmt-config",
       "version": "0.0.0",
-      "devDependencies": {
+      "dependencies": {
         "oxfmt": "catalog:",
       },
     },
     "packages/oxlint-config": {
-      "name": "@repo/oxlint-config",
+      "name": "@pieceofit/oxlint-config",
       "version": "0.0.0",
-      "devDependencies": {
+      "dependencies": {
         "oxlint": "catalog:",
       },
     },
     "packages/typescript-config": {
-      "name": "@repo/typescript-config",
+      "name": "@pieceofit/typescript-config",
       "version": "0.0.0",
       "devDependencies": {
         "typescript": "catalog:",
@@ -262,11 +262,11 @@
 
     "@oxlint/binding-win32-x64-msvc": ["@oxlint/binding-win32-x64-msvc@1.76.0", "", { "os": "win32", "cpu": "x64" }, "sha512-5qcirPHO8nKfkoowEVWtpAoVTcYDy6g0UT0NGic450Qv8J2NrOqg4uQ8QppRP4MDTC7Xx47lbZnmadTH03CGGA=="],
 
-    "@repo/oxfmt-config": ["@repo/oxfmt-config@workspace:packages/oxfmt-config"],
+    "@pieceofit/oxfmt-config": ["@pieceofit/oxfmt-config@workspace:packages/oxfmt-config"],
 
-    "@repo/oxlint-config": ["@repo/oxlint-config@workspace:packages/oxlint-config"],
+    "@pieceofit/oxlint-config": ["@pieceofit/oxlint-config@workspace:packages/oxlint-config"],
 
-    "@repo/typescript-config": ["@repo/typescript-config@workspace:packages/typescript-config"],
+    "@pieceofit/typescript-config": ["@pieceofit/typescript-config@workspace:packages/typescript-config"],
 
     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.2.1", "", { "os": "android", "cpu": "arm64" }, "sha512-02hOeOSryYxVrOIphmLAsqnCJWxwlzFk+pEt/N/i6OgT3lShHO7xGCU5cpgchRDHboAEbSjzgGh+O/u1GswQmA=="],
 

@@ -1,17 +1,19 @@
 {
-  "name": "@repo/oxlint-config",
+  "name": "@pieceofit/oxlint-config",
   "version": "0.0.0",
   "private": true,
   "description": "Shared oxlint configurations for the monorepo",
   "files": [
-    "base.json",
-    "react.json"
+    "base.ts",
+    "react.ts"
   ],
+  "type": "module",
   "exports": {
-    "./base": "./base.json",
-    "./react": "./react.json"
+    ".": "./base.ts",
+    "./base": "./base.ts",
+    "./react": "./react.ts"
   },
-  "devDependencies": {
+  "dependencies": {
     "oxlint": "catalog:"
   }
 }

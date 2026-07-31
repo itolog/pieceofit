@@ -1,15 +1,19 @@
 {
-  "name": "@repo/oxfmt-config",
+  "name": "@pieceofit/oxfmt-config",
   "version": "0.0.0",
   "private": true,
-  "description": "Shared oxfmt configuration for the monorepo",
+  "description": "Shared oxfmt configurations for the monorepo",
   "files": [
-    "base.json"
+    "base.ts",
+    "react.ts"
   ],
+  "type": "module",
   "exports": {
-    "./base": "./base.json"
+    ".": "./base.ts",
+    "./base": "./base.ts",
+    "./react": "./react.ts"
   },
-  "devDependencies": {
+  "dependencies": {
     "oxfmt": "catalog:"
   }
 }

@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(code-review)",
+      "Skill(claude-api)",
+      "Bash(bun run *)",
+      "Bash(bunx tsc *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(rg *)",
+      "Bash(find *)",
+      "Bash(cat *)",
+      "Bash(bun audit)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(bunx oxfmt *)",
+      "Bash(bunx oxlint *)"
+    ],
+    "deny": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git tag *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)"
+    ]
+  },
+  "enabledPlugins": {
+    "warp@claude-code-warp": true
+  }
+}

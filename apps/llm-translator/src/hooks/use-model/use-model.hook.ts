@@ -103,12 +103,12 @@ export function useModel({ addMessage }: UseModelOptions) {
           "No models are installed. Pull one first, e.g.: ollama pull gemma3:4b",
         );
       })
-      .with({ status: "fallback" }, ({ model }) => {
+      .with({ status: "fallback" }, ({ model: fallbackModel }) => {
         const wanted = llmModelService.getModel();
-        llmModelService.setModel(model);
+        llmModelService.setModel(fallbackModel);
         addMessage(
           "Bot",
-          `Model "${wanted}" is not installed — switched to "${model}". Use /model to pick another.`,
+          `Model "${wanted}" is not installed — switched to "${fallbackModel}". Use /model to pick another.`,
         );
         modelAvailableRef.current = true;
       })
@@ -128,9 +128,9 @@ export function useModel({ addMessage }: UseModelOptions) {
 
   // Switches the active model (shared by `/model <name>` and the picker).
   const applyModel = useCallback(
-    async (model: string) => {
-      llmModelService.setModel(model);
-      addMessage("Bot", `Model changed to: ${model}`);
+    async (nextModel: string) => {
+      llmModelService.setModel(nextModel);
+      addMessage("Bot", `Model changed to: ${nextModel}`);
       await verifyModel();
     },
     [addMessage, verifyModel],
@@ -158,9 +158,9 @@ export function useModel({ addMessage }: UseModelOptions) {
   }, [addMessage, reportTagsFailure]);
 
   const selectModel = useCallback(
-    async (model: string) => {
+    async (nextModel: string) => {
       setModelItems(null);
-      await applyModel(model);
+      await applyModel(nextModel);
     },
     [applyModel],
   );
@@ -169,9 +169,9 @@ export function useModel({ addMessage }: UseModelOptions) {
 
   // Updates the sampling temperature (shared by `/temp <value>` and the stepper).
   const applyTemp = useCallback(
-    (temp: number) => {
-      llmModelService.setTemperature(temp);
-      addMessage("Bot", `Temperature changed to: ${temp}`);
+    (nextTemp: number) => {
+      llmModelService.setTemperature(nextTemp);
+      addMessage("Bot", `Temperature changed to: ${nextTemp}`);
     },
     [addMessage],
   );
@@ -179,9 +179,9 @@ export function useModel({ addMessage }: UseModelOptions) {
   const openTempPicker = useCallback(() => setTempPickerOpen(true), []);
 
   const selectTemp = useCallback(
-    (temp: number) => {
+    (nextTemp: number) => {
       setTempPickerOpen(false);
-      applyTemp(temp);
+      applyTemp(nextTemp);
     },
     [applyTemp],
   );

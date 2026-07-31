@@ -102,9 +102,9 @@ export function useChat({
         setToLang(lang);
         addMessage("Bot", `Target language changed to: ${lang}`);
       })
-      .with({ type: "model" }, ({ model }) => applyModel(model))
+      .with({ type: "model" }, ({ model: nextModel }) => applyModel(nextModel))
       .with({ type: "models" }, () => openModelPicker())
-      .with({ type: "temp" }, ({ temp }) => applyTemp(temp))
+      .with({ type: "temp" }, ({ temp: nextTemp }) => applyTemp(nextTemp))
       .with({ type: "tempPicker" }, () => openTempPicker())
       .with({ type: "clear" }, clearChat)
       .with({ type: "help" }, showHelp)

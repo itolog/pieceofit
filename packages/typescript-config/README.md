@@ -1,4 +1,4 @@
-# `@repo/typescript-config`
+# `@pieceofit/typescript-config`
 
 Shared `tsconfig.json` presets. All of them are strict and add
 `noUncheckedIndexedAccess` and `noFallthroughCasesInSwitch`.
@@ -18,7 +18,7 @@ by others.
 
 ```json
 {
-  "extends": "@repo/typescript-config/bun.json",
+  "extends": "@pieceofit/typescript-config/bun.json",
   "compilerOptions": {
     "types": ["bun"],
     "rootDir": "./src",
@@ -28,7 +28,7 @@ by others.
 }
 ```
 
-with `@repo/typescript-config`, `typescript` (`catalog:`) and — for Bun globals —
+with `@pieceofit/typescript-config`, `typescript` (`catalog:`) and — for Bun globals —
 `@types/bun` in the consumer's `devDependencies`.
 
 Per-project settings stay in the consumer, not here: `types`, `rootDir`, `paths`,
@@ -53,7 +53,7 @@ component library adds the one option it needs:
 
 ```json
 {
-  "extends": "@repo/typescript-config/library.json",
+  "extends": "@pieceofit/typescript-config/library.json",
   "compilerOptions": { "jsx": "react-jsx" }
 }
 ```
@@ -65,7 +65,7 @@ consumer's call.
 ## Notes on the strictness knobs
 
 Unused locals and parameters are reported by oxlint (`no-unused-vars` in
-`@repo/oxlint-config`), so `noUnusedLocals`/`noUnusedParameters` are deliberately
+`@pieceofit/oxlint-config`), so `noUnusedLocals`/`noUnusedParameters` are deliberately
 left off to avoid duplicate diagnostics. `noFallthroughCasesInSwitch` is the
 opposite case — oxlint does **not** flag a fallthrough `case`, so TypeScript
 carries that check.
@@ -83,7 +83,7 @@ through a bundler can do the same in its own `tsconfig.json`:
 
 ```json
 {
-  "extends": "@repo/typescript-config/library.json",
+  "extends": "@pieceofit/typescript-config/library.json",
   "compilerOptions": { "module": "Preserve", "moduleResolution": "bundler" }
 }
 ```
