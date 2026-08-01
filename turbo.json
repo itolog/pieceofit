@@ -7,14 +7,24 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
-    "lint": {
-      "dependsOn": ["^lint"]
+    "//#quality": {
+      "dependsOn": ["//#quality:lint", "//#quality:format"]
     },
-    "fix:lint": {
+    "//#quality:lint": {},
+    "//#quality:format": {},
+    "//#quality:fix": {
+      "dependsOn": ["//#fix:lint", "//#fix:format"]
+    },
+    "//#fix:lint": {
       "cache": false
     },
-    "format": {
+    "//#fix:format": {
+      "dependsOn": ["//#fix:lint"],
       "cache": false
+    },
+    "//#check-unused": {},
+    "check-types": {
+      "dependsOn": ["^check-types"]
     },
     "dev": {
       "cache": false,

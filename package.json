@@ -7,19 +7,24 @@
       "packages/*"
     ],
     "catalog": {
-      "concurrently": "10.0.4",
       "oxfmt": "0.61.0",
       "oxlint": "1.76.0",
       "typescript": "7.0.2"
     }
   },
+  "type": "module",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "fix:lint": "turbo run fix:lint",
-    "format": "turbo run format",
+    "check": "turbo run quality",
+    "fix": "turbo run quality:fix",
+    "quality:lint": "oxlint .",
+    "quality:format": "oxfmt --check .",
+    "fix:lint": "oxlint --fix .",
+    "fix:format": "oxfmt --write .",
     "check-types": "turbo run check-types",
+    "check-unused": "knip",
+    "verify": "turbo run quality check-types test check-unused",
     "test": "turbo run test",
     "deps:audit": "bun audit",
     "deps:outdated": "bun outdated --filter='*'",
@@ -27,6 +32,11 @@
     "deps:reinstall": "rm -rf node_modules bun.lock && bun install"
   },
   "devDependencies": {
+    "@pieceofit/oxfmt-config": "workspace:*",
+    "@pieceofit/oxlint-config": "workspace:*",
+    "knip": "6.31.0",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
     "turbo": "2.10.8"
   },
   "devEngines": {

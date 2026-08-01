@@ -21,18 +21,18 @@ This Turborepo includes the following packages/apps:
 - `@pieceofit/oxlint-config`: shared [oxlint](https://oxc.rs/) configs (`base`, `react`)
 - `@pieceofit/oxfmt-config`: shared [oxfmt](https://oxc.rs/) formatting + import-sorting config
 
-Tooling lives in the packages that use it, not at the root: each app/package
-declares `oxlint`, `oxfmt`, `typescript` (all `catalog:`) plus the shared config
-packages it needs, and exposes `lint` / `format` / `check-types` scripts. The root
-only holds `turbo`, which orchestrates them.
+Tooling is split by responsibility: the root runs everything that works across the
+whole repo in one pass — `oxlint`, `oxfmt`, `knip` — while each app/package keeps
+its own config files (which override the root's for its files) and the one check
+that needs its own `tsconfig`: `tsc`. See [Lint & format](#lint--format).
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
 ### Shared dependency versions
 
-`oxlint`, `oxfmt`, `typescript` and `concurrently` are pinned once in the
-[Bun catalog](https://bun.com/docs/pm/catalogs) under `workspaces.catalog` in the
-root `package.json`. Packages depend on them with the catalog protocol, so a
+`oxlint`, `oxfmt` and `typescript` are pinned once in the
+[Bun catalog](https://bun.com/docs/pm/catalogs) — the top-level `catalog` field of
+the root `package.json`. Packages depend on them with the catalog protocol, so a
 version bump happens in one place:
 
 ```json
@@ -53,41 +53,70 @@ This Turborepo has some additional tools already setup for you:
 
 ### Lint & format
 
-From the root, every task fans out through turbo:
+Checks live on two levels, split by who can do the work.
+
+**The root owns oxc.** `oxlint` and `oxfmt` walk the entire repo in one pass —
+apps, packages and the loose files at the root alike — so they are not repeated
+per package:
 
 ```sh
-bun run lint          # turbo run lint
-bun run fix:lint      # turbo run fix:lint
-bun run format        # turbo run format
-bun run check-types   # turbo run check-types
+bun run check   # turbo run quality      → oxlint . + oxfmt --check .
+bun run fix     # turbo run quality:fix  → oxlint --fix . then oxfmt --write .
 ```
 
-An app or package wires itself up like this — `lint` runs its own `lint:*` scripts
-in parallel via `concurrently`:
+The `fix` order is deliberate: `//#fix:format` `dependsOn` `//#fix:lint`, so the
+two never write the same file at once. Note that `quality` and `quality:fix` are
+turbo tasks only — a script may not invoke a Root Task of the same name, which is
+why the entry points are called `check` and `fix`.
+
+`knip` lives at the root for the same reason, but stays out of `quality`: it
+resolves the whole module graph, which is too slow for a pre-commit hook. It also
+_has_ to run from the root — started inside a package it cannot see the root
+`catalog`, and reports every `catalog:` dependency as an unresolved reference:
+
+```sh
+bun run check-unused   # knip across every workspace
+```
+
+**Each package owns its rules, and whatever the root cannot do.** A nested
+`oxlint.config.ts` / `oxfmt.config.ts` _replaces_ the root one for that package's
+files, and the root run picks it up automatically — so centralising the run does
+not centralise the rules. What stays in a package is the one check that needs its
+own `tsconfig`:
 
 ```json
 {
   "scripts": {
-    "lint": "conc --timings -c \"auto\" \"bun:lint:*\"",
-    "lint:code": "oxlint",
-    "lint:format": "oxfmt --check .",
-    "lint:types": "tsc --noEmit",
-    "fix:lint": "oxlint --fix",
-    "format": "oxfmt --write ."
-  },
-  "devDependencies": {
-    "@pieceofit/oxfmt-config": "*",
-    "@pieceofit/oxlint-config": "*",
-    "@pieceofit/typescript-config": "*",
-    "concurrently": "catalog:",
-    "oxfmt": "catalog:",
-    "oxlint": "catalog:",
-    "typescript": "catalog:"
+    "check-types": "tsc --noEmit"
   }
 }
 ```
 
-plus its own `oxlint.config.ts` and `oxfmt.config.ts`:
+```sh
+bun run check-types   # turbo run check-types → tsc in every package
+```
+
+So the root is where checks are run from, named by what they cover rather than by
+which tool runs them:
+
+| Command                | What it covers                         |
+| ---------------------- | -------------------------------------- |
+| `bun run verify`       | **everything below** — the finish line |
+| `bun run check`        | oxlint + oxfmt, whole repo             |
+| `bun run fix`          | the autofixable half of `check`        |
+| `bun run check-types`  | `tsc` in every package                 |
+| `bun run check-unused` | knip, whole repo                       |
+
+`verify` is one `turbo run` over all four, so everything is cached and parallel:
+~2 s cold, single-digit milliseconds when nothing changed. Run it before calling
+a task done.
+
+The trade-off worth knowing: a package no longer reports lint, formatting or
+dead-code problems on its own — those surface only from the root. That is also
+why there is no package-level `verify`: it would pass while the repo is broken.
+
+A package still declares its own `oxlint`/`oxfmt` plus the shared config packages,
+because that is what its `oxlint.config.ts` and `oxfmt.config.ts` import:
 
 ```ts
 import { defineConfig } from "oxlint";

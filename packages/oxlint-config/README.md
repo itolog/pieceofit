@@ -27,16 +27,17 @@ export default defineConfig({
 
 ```json
 {
-  "scripts": {
-    "lint:code": "oxlint",
-    "fix:lint": "oxlint --fix"
-  },
   "devDependencies": {
-    "@pieceofit/oxlint-config": "*",
+    "@pieceofit/oxlint-config": "workspace:*",
     "oxlint": "catalog:"
   }
 }
 ```
+
+The package declares the dependency but no `oxlint` script of its own: `oxlint`
+runs once from the repo root over every workspace, and picks this package's
+`oxlint.config.ts` up automatically — a nested config replaces the root one for
+that package's files.
 
 ## Why TypeScript and not `.oxlintrc.json`
 

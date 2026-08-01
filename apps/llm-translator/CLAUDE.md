@@ -13,12 +13,13 @@ or `pnpm`.** Use `bun run <script>` for scripts and `bunx <tool>` for one-off bi
 with no argument lists every script — that list is the source of truth, not this file.
 
 - `bun run test` runs Vitest — **never `bun test`** (different runtime, incompatible APIs).
-- `bun run verify` is lint + test: always run it before considering a task done, and fix what it
-  reports before moving on.
-
-Keep this block free of trailing `#` comments — extra words after a script name are passed through
-as arguments to it, and `verify` forwards them to `concurrently`, which then tries to execute each
-word as a command.
+- **`verify` lives at the repo root, not here** — `bun run verify` from the root is lint +
+  format + types + tests + dead code in one pass (~1 s). Always run it before considering a
+  task done, and fix what it reports before moving on. There is deliberately no local `verify`:
+  linting, formatting and dead-code detection are repo-wide now, so a package-level one would
+  pass while the repo is broken.
+- Inside this package only `check-types` and `test` exist — useful for a tight loop, but they
+  are not the finish line.
 
 ## Planning
 
@@ -119,8 +120,10 @@ a path into `node_modules` — and it means `tsc` type-checks them (they are in 
   adds over `./base`). oxfmt has no `extends` at all, and silently ignores the key if you
   write one, so object spread is the composition mechanism — and `sortImports` is replaced
   by a spread rather than merged, which is why the preset re-spreads the shared half.
-- **Dead code:** [knip](https://knip.dev/) (`knip.json`), run as `bun run lint:unused` (folds
-  into `bun run verify`). Kept **out of pre-commit** — it resolves the whole module graph, so
-  it can't run on staged files only.
+- **Dead code:** [knip](https://knip.dev/) — lives at the **repo root** (`knip.json` there
+  carries this app's settings under `workspaces`), run as `bun run check-unused`. It has to
+  run from the root: started inside this package it cannot see the root `catalog`, and
+  reports every `catalog:` dependency as an unresolved reference. Kept **out of pre-commit**
+  — it resolves the whole module graph, so it can't run on staged files only.
 - **Git hooks:** none. Upstream used Lefthook, but hooks install from the repo root, so if we
   want them they belong there, not in this package.

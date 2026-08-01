@@ -25,16 +25,16 @@ export default defineConfig({ ...react });
 
 ```json
 {
-  "scripts": {
-    "lint:format": "oxfmt --check .",
-    "format": "oxfmt --write ."
-  },
   "devDependencies": {
-    "@pieceofit/oxfmt-config": "*",
+    "@pieceofit/oxfmt-config": "workspace:*",
     "oxfmt": "catalog:"
   }
 }
 ```
+
+The package declares the dependency but no `oxfmt` script of its own: `oxfmt`
+runs once from the repo root over every workspace, and picks this package's
+`oxfmt.config.ts` up automatically — nested configs win for their own files.
 
 Per-package tweaks go after the spread:
 
