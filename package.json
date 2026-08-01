@@ -22,11 +22,12 @@
     "check-types": "turbo run check-types",
     "test": "turbo run test",
     "deps:audit": "bun audit",
-    "deps:update": "bun update -i",
+    "deps:outdated": "bun outdated --filter='*'",
+    "deps:update": "bun update -r -i",
     "deps:reinstall": "rm -rf node_modules bun.lock && bun install"
   },
   "devDependencies": {
-    "turbo": "2.10.7"
+    "turbo": "2.10.8"
   },
   "devEngines": {
     "packageManager": {
