@@ -71,6 +71,7 @@ Type into the input field. Anything not starting with `/` is translated.
 - **Run in watch mode**: `bun run dev`
 - **Linting**: `bun run lint` (powered by [Oxc](https://oxc.rs/) / `oxlint`)
 - **Formatting**: `bun run format` (powered by [Oxc](https://oxc.rs/) / `oxfmt`)
-- **Tests**: `bun run test` (Vitest — note: `bun run test`, not `bun test`)
+- **Tests**: `bun run test:unit` (Vitest — the script avoids the name `test` so it can never
+  collide with Bun's built-in `bun test` runner)
 - **Full verification**: `bun run verify` (lint + tests)
 - **Build a standalone binary**: `bun run build` → `dist/llm-translator`

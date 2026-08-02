@@ -24,12 +24,15 @@
     },
     "//#check-unused": {},
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["^check-types"],
+      "inputs": ["$TURBO_DEFAULT$", "!README.md", "!CLAUDE.md"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
-    "test": {}
+    "test:unit": {
+      "inputs": ["$TURBO_DEFAULT$", "!README.md", "!CLAUDE.md"]
+    }
   }
 }

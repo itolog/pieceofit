@@ -12,14 +12,17 @@ model + temperature are seeded from `src/config/model-config/`.
 or `pnpm`.** Use `bun run <script>` for scripts and `bunx <tool>` for one-off binaries. `bun run`
 with no argument lists every script — that list is the source of truth, not this file.
 
-- `bun run test` runs Vitest — **never `bun test`** (different runtime, incompatible APIs).
+- `bun run test:unit` runs Vitest. The script is deliberately **not** called `test`: `bun test`
+  is Bun's own built-in runner (different runtime, incompatible APIs — no `vi.hoisted`, no
+  `vitest.config.ts`), and IDE runners drop the `run` word, so a script named `test` would
+  silently start the wrong runner.
 - **`verify` lives at the repo root, not here** — `bun run verify` from the root is lint +
   format + types + tests + dead code in one pass (~1 s). Always run it before considering a
   task done, and fix what it reports before moving on. There is deliberately no local `verify`:
   linting, formatting and dead-code detection are repo-wide now, so a package-level one would
   pass while the repo is broken.
-- Inside this package only `check-types` and `test` exist — useful for a tight loop, but they
-  are not the finish line.
+- Inside this package only `check-types` and `test:unit` exist — useful for a tight loop, but
+  they are not the finish line.
 
 ## Planning
 
