@@ -14,6 +14,7 @@
   },
   "type": "module",
   "scripts": {
+    "prepare": "lefthook install",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "quality:lint": "oxlint .",
@@ -35,6 +36,7 @@
     "@pieceofit/oxfmt-config": "workspace:*",
     "@pieceofit/oxlint-config": "workspace:*",
     "knip": "6.31.0",
+    "lefthook": "2.1.10",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "turbo": "2.10.8"

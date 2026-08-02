@@ -1,0 +1,22 @@
+# https://bun.com/docs/runtime/bunfig
+
+[install]
+# The default registry. Set explicitly to pin the package source, so an
+# ambient config can't silently redirect installs to a different registry.
+registry = "https://registry.npmjs.org/"
+
+# Save exact versions on `bun add` (1.2.3 instead of ^1.2.3)
+# Eliminates dependency drift through semver ranges
+exact = true
+
+# Only install package versions published at least 3 days ago
+#minimumReleaseAge = 259200
+
+[install.lockfile]
+# Always write the lockfile — guarantees reproducibility and integrity
+save = true
+
+[run]
+# Run everything through Bun: even scripts/tools that invoke `node`
+# (incl. node shebangs) get redirected to the Bun runtime.
+bun = true

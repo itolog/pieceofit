@@ -43,6 +43,12 @@ version bump happens in one place:
 }
 ```
 
+Everything else is pinned exactly — no `^`, no drift. That is not a convention you
+have to remember: the root `bunfig.toml` sets `exact = true`, so `bun add` writes
+`1.2.3` rather than `^1.2.3`. The same file pins the registry explicitly and sets
+`[run] bun = true`, which puts every `node`-shebang tool (`vitest`, `turbo`,
+`oxlint`, `knip`, `tsc`) on the Bun runtime — the same runtime the app ships on.
+
 ### Utilities
 
 This Turborepo has some additional tools already setup for you:
@@ -50,6 +56,8 @@ This Turborepo has some additional tools already setup for you:
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for code linting
 - [oxfmt](https://oxc.rs/docs/guide/usage/formatter) for code formatting and import sorting
+- [knip](https://knip.dev/) for dead code and unused dependencies
+- [lefthook](https://lefthook.dev/) for git hooks — see [Git hooks](#git-hooks)
 
 ### Lint & format
 
@@ -70,7 +78,8 @@ turbo tasks only — a script may not invoke a Root Task of the same name, which
 why the entry points are called `check` and `fix`.
 
 `knip` lives at the root for the same reason, but stays out of `quality`: it
-resolves the whole module graph, which is too slow for a pre-commit hook. It also
+answers a different question (dead code, not style) and costs an order of
+magnitude more, so it keeps its own entry point and its own turbo task. It also
 _has_ to run from the root — started inside a package it cannot see the root
 `catalog`, and reports every `catalog:` dependency as an unresolved reference:
 
@@ -142,6 +151,48 @@ config as a **package** instead of a path into `node_modules`. See the config
 packages' READMEs for the details (oxlint's `extends` carries `plugins`,
 `categories`, `rules` and `overrides` but not a top-level `env`; oxfmt has no
 `extends` at all, so it composes by object spread).
+
+### Git hooks
+
+[Lefthook](https://lefthook.dev/) runs the same checks, scoped to what you are
+actually committing or pushing. It is configured once at the root — hooks install
+into the one `.git`, so a per-package config would have nowhere to go.
+
+| Hook         | Jobs (parallel)                                  | Scope                                     |
+| ------------ | ------------------------------------------------ | ----------------------------------------- |
+| `pre-commit` | `lint & format` · `check-types` · `check-unused` | staged files · whole package · whole repo |
+| `pre-push`   | `audit` · `test:unit`                            | whole repo                                |
+
+Both hooks run their jobs in parallel. Inside `lint & format` the two steps stay
+sequential — `oxlint --fix` and `oxfmt --write` write to the same files, so
+running _those_ concurrently would be a write race.
+
+`lint & format` is cheap because it only sees `{staged_files}` — and passing
+explicit paths does **not** flatten the rules: oxc still resolves the nearest
+`oxlint.config.ts` / `oxfmt.config.ts`, so a file in `apps/llm-translator` is
+judged by that app's react preset. Fixes are re-staged automatically
+(`stage_fixed: true`); anything oxlint cannot fix on its own fails the commit.
+
+`check-types` and `check-unused` cannot be scoped that way — types and dead code
+are properties of the whole graph, not of one file. Both are affordable anyway
+because turbo caches them: an untouched repo costs milliseconds, and editing an
+app file does invalidate the root `//#check-unused` task, so the cache never hides
+a real finding. They run on commit rather than on push so the mistake surfaces
+while the change is still in your head.
+
+Note what `check-unused` implies: a file you add but do not import yet is dead
+code, and the commit will say so. Wire it up, or commit with `LEFTHOOK=0`.
+
+`pre-push` keeps what genuinely belongs to "about to leave this machine":
+the test suite and a dependency audit.
+
+Hooks are installed by the root `prepare` script, so they re-sync on every
+`bun install` — no manual setup after cloning. To bypass them once:
+
+```sh
+LEFTHOOK=0 git commit -m "…"   # skip lefthook, keep other hooks
+git commit --no-verify         # skip all git hooks
+```
 
 ### Build
 
