@@ -10,10 +10,12 @@
     "//#quality": {
       "dependsOn": ["//#quality:lint", "//#quality:format"]
     },
-    "//#quality:lint": {},
+    "//#quality:lint": {
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"]
+    },
     "//#quality:format": {},
     "//#quality:fix": {
-      "dependsOn": ["//#fix:lint", "//#fix:format"]
+      "dependsOn": ["//#fix:format"]
     },
     "//#fix:lint": {
       "cache": false
@@ -22,7 +24,9 @@
       "dependsOn": ["//#fix:lint"],
       "cache": false
     },
-    "//#check-unused": {},
+    "//#knip": {
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"],
       "inputs": ["$TURBO_DEFAULT$", "!README.md", "!CLAUDE.md"]

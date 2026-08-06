@@ -5,20 +5,18 @@ pre-commit:
       group:
         jobs:
           - name: lint
-            run: bunx oxlint --fix {staged_files}
+            run: bunx oxlint {staged_files}
             glob: "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}"
-            stage_fixed: true
 
           - name: format
-            run: bunx oxfmt --write {staged_files}
+            run: bunx oxfmt --check {staged_files}
             glob: "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,jsonc,md}"
-            stage_fixed: true
 
     - name: check-types
       run: bun run check-types
 
     - name: check-unused
-      run: bunx turbo run check-unused
+      run: bun run check-unused
 
 pre-push:
   parallel: true

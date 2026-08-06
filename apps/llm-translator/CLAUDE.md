@@ -8,20 +8,16 @@ model + temperature are seeded from `src/config/model-config/`.
 
 ## Commands
 
-**`bun` is the only package manager and script runner here.** Use `bun run <script>` for
-scripts and `bunx <tool>` for one-off binaries — in place of `npm`, `npx`, `yarn` or `pnpm`,
-none of which are wired up here. `bun run` with no argument lists every script; that list is
-the source of truth, not this file.
+The repo-wide rules — `bun` as the only runner, and `bun run verify` from the root as the
+finish line before a task is done — are in [the root CLAUDE.md](../../CLAUDE.md). What is
+specific here:
 
 - `bun run test:unit` runs Vitest. The script is deliberately **not** called `test`: `bun test`
   is Bun's own runner (different runtime, incompatible APIs), and IDE runners drop the `run`
   word, so a script named `test` would silently start the wrong one.
-- **`verify` lives at the repo root, not here** — `bun run verify` from the root is lint +
-  format + types + tests + dead code in one pass (~1 s). Run it before considering a task
-  done, and fix what it reports. A package-level `verify` would pass while the repo is broken,
-  which is why there is none.
-- Inside this package only `check-types` and `test:unit` exist — good for a tight loop, but
-  they are not the finish line.
+- Only `check-types` and `test:unit` exist inside this package — good for a tight loop, but
+  they are not the finish line. There is deliberately no package-level `verify`: it would pass
+  while the rest of the repo is broken.
 
 ## Planning
 
