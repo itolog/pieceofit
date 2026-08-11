@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { appConfig } from "@/config";
+import { appConfig } from "@/config/app-config";
 import { Message } from "@/types/message.type";
 import { createMessage } from "@/utils/create-message";
 

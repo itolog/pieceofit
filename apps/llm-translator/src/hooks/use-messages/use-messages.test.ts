@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 // A small history cap keeps the slice test cheap to set up.
-vi.mock("@/config", () => ({ appConfig: { MAX_MESSAGES: 3 } }));
+vi.mock("@/config/app-config", () => ({ appConfig: { MAX_MESSAGES: 3 } }));
 
 import { useMessages } from "./use-messages.hook";
 

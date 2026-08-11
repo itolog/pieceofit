@@ -1,7 +1,8 @@
 import { Runnable } from "@langchain/core/runnables";
 import { ChatOllama } from "@langchain/ollama";
 
-import { appConfig, defaultModelConfig } from "@/config";
+import { appConfig } from "@/config/app-config";
+import { defaultModelConfig } from "@/config/model-config";
 import { cleanText } from "@/utils/clean-text";
 import { withRetry } from "@/utils/with-retry";
 
