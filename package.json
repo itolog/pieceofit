@@ -7,8 +7,8 @@
       "packages/*"
     ],
     "catalog": {
-      "oxfmt": "0.62.0",
-      "oxlint": "1.77.0",
+      "oxfmt": "0.63.0",
+      "oxlint": "1.78.0",
       "typescript": "7.0.2"
     }
   },
@@ -31,16 +31,17 @@
     "deps:audit": "bun audit",
     "deps:outdated": "bun outdated --filter='*'",
     "deps:update": "bun update -r -i",
-    "deps:reinstall": "rm -rf node_modules bun.lock && bun install"
+    "deps:reinstall": "rm -rf node_modules apps/*/node_modules packages/*/node_modules && bun install",
+    "deps:reset": "rm -f bun.lock && bun run deps:reinstall"
   },
   "devDependencies": {
     "@pieceofit/oxfmt-config": "workspace:*",
     "@pieceofit/oxlint-config": "workspace:*",
-    "knip": "6.31.0",
+    "knip": "6.32.1",
     "lefthook": "2.1.10",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
-    "turbo": "2.10.8"
+    "turbo": "2.10.9"
   },
   "devEngines": {
     "packageManager": {
