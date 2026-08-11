@@ -35,9 +35,10 @@ This app lives in the `pieceofit` monorepo at `apps/llm-translator`.
 
    The Ollama endpoint and timeouts live in
    `src/config/app-config/app-config.ts` (`OLLAMA_BASE_URL`, `LLM_TIMEOUT_MS`,
-   `MODEL_CHECK_TIMEOUT_MS`, `MAX_MESSAGES`). To point at a non-default Ollama
-   host without editing source, set the `OLLAMA_URL` environment variable (e.g.
-   in a `.env` file); it falls back to `http://localhost:11434`.
+   `MODEL_CHECK_TIMEOUT_MS`, `MAX_MESSAGES`). Unlike the model and temperature,
+   these are **not** runtime-mutable and are not read from the environment —
+   `OLLAMA_BASE_URL` is hard-coded to `http://localhost:11434`, so pointing at
+   another Ollama host means editing that file.
 
 ## 🚀 Usage
 
@@ -67,11 +68,28 @@ Type into the input field. Anything not starting with `/` is translated.
 
 - **Conventions**: `../../.claude/rules/` — `module-architecture.md` (module folders,
   naming, helper placement) and `code-comments.md` (comment style). Project
-  specifics (layout, key decisions) are in `CLAUDE.md`.
-- **Run in watch mode**: `bun run dev`
-- **Linting**: `bun run lint` (powered by [Oxc](https://oxc.rs/) / `oxlint`)
-- **Formatting**: `bun run format` (powered by [Oxc](https://oxc.rs/) / `oxfmt`)
-- **Tests**: `bun run test:unit` (Vitest — the script avoids the name `test` so it can never
-  collide with Bun's built-in `bun test` runner)
-- **Full verification**: `bun run verify` (lint + tests)
+  specifics (layout, key decisions) are in `CLAUDE.md` and
+  [`docs/decisions.md`](docs/decisions.md).
+
+What runs **from this directory**:
+
+- **Watch mode**: `bun run dev`
+- **Tests**: `bun run test:unit` (Vitest). Add a pattern to narrow it —
+  `bun run test:unit use-chat` — or use `test:unit-watch` / `test:unit-coverage`
+  (coverage fails below the thresholds in `vitest.config.ts`).
+  The script avoids the name `test` so it can never collide with Bun's own
+  `bun test` runner, which IDE runners would otherwise start instead.
+- **Types**: `bun run check-types` (`tsc --noEmit`)
 - **Build a standalone binary**: `bun run build` → `dist/llm-translator`
+
+What runs **only from the repo root**, because [Oxc](https://oxc.rs/) (`oxlint`, `oxfmt`)
+and [knip](https://knip.dev/) walk the whole repo in one pass:
+
+- **Lint + format**: `bun run check` (`bun run fix` for the autofixable half)
+- **Dead code**: `bun run check-unused`
+- **Full verification**: `bun run verify` — lint, format, types, tests and dead code.
+  This is the finish line, and there is deliberately no package-level equivalent: it
+  would pass while the rest of the repo is broken.
+
+This package still owns its lint/format _rules_ (`oxlint.config.ts`, `oxfmt.config.ts`);
+a nested config **replaces** the root one for these files rather than merging with it.

@@ -1,10 +1,22 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this
+repository.
+
 ## Repo Overview
 
 A Bun + Turborepo monorepo. `apps/*` holds runnable apps, `packages/*` the shared configs they
 extend (`typescript-config`, `oxlint-config`, `oxfmt-config`). Each app/package has its own
 `CLAUDE.md` where it has anything to add — read it before working inside one.
+
+One app today: **`apps/llm-translator`** — an Ink (React-for-CLI) + LangChain + Ollama terminal
+translator. Its invariants are in [its `CLAUDE.md`](apps/llm-translator/CLAUDE.md) and the _why_
+behind them in [`docs/decisions.md`](apps/llm-translator/docs/decisions.md).
+
+The `packages/*` configs are consumed as **package specifiers with subpath exports**, never as
+paths into `node_modules`: `@pieceofit/oxlint-config` / `…/react`, `@pieceofit/oxfmt-config` /
+`…/react`, `@pieceofit/typescript-config/{base,bun,react,library}.json`. There is deliberately no
+aggregating barrel re-exporting them.
 
 ## Commands
 
@@ -28,11 +40,33 @@ it often. A green package-level check means nothing while the repo is red, which
 
 Scripts that name a tool (`quality:lint`, `quality:format`, `fix:lint`, `fix:format`, `knip`) are
 the bodies of turbo tasks, not entry points — calling them directly works but skips the cache.
+In `turbo.json` those root-only tasks carry the `//#` prefix; everything without it (`build`,
+`dev`, `check-types`, `test:unit`) fans out to the workspaces.
+
+**Every tool runs on the Bun runtime, not Node** — `bunfig.toml` sets `[run] bun = true`, so
+`vitest`, `turbo`, `tsc`, `oxlint` and `knip` execute on Bun even where they ship a `node`
+shebang. Behaviour that depends on the runtime will differ from the same tool run outside the
+repo.
 
 **Fixes are yours to run, not the hook's.** `pre-commit` only checks (`oxlint`, `oxfmt --check`,
 types, knip) and never writes to your files or stages anything on your behalf; `pre-push` adds
 `bun audit` and the unit tests. When a hook fails on style, `bun run fix` and stage the diff
 yourself.
+
+### Tests
+
+Vitest, per app. Run them from the app directory (`apps/llm-translator`):
+
+| Command                       | What it does                                                   |
+| ----------------------------- | -------------------------------------------------------------- |
+| `bun run test:unit`           | the whole suite, once                                          |
+| `bun run test:unit <pattern>` | only files matching the pattern (e.g. `use-chat`)              |
+| `bun run test:unit-watch`     | watch mode                                                     |
+| `bun run test:unit-coverage`  | coverage; **fails below the thresholds** in `vitest.config.ts` |
+
+**Never `bun test`** — that is Bun's own runner (different runtime, incompatible APIs). The
+script is named `test:unit` rather than `test` precisely so IDE runners, which drop the `run`
+word, cannot start the wrong one.
 
 ## Where checks live
 
@@ -45,6 +79,27 @@ the check that needs its own `tsconfig`: `tsc --noEmit`, plus that package's tes
 Consequence worth knowing: a package does not report lint, formatting or dead-code problems on
 its own. Those surface only from the root.
 
+Those nested configs are **TypeScript** (`oxlint.config.ts`, not `.oxlintrc.json`) for one
+reason: only a TS config can `import` a shared preset as a package specifier. Two composition
+traps live there — oxlint's top-level `env` is **not** inherited through `extends`, so each app
+restates its runtime globals; oxfmt has no `extends` at all and silently ignores the key, so its
+presets compose by object spread.
+
+Knip is configured once in the root `knip.json`, with per-workspace settings under `workspaces`.
+It cannot be run from inside a package: started there it cannot see the root `catalog` and
+reports every `catalog:` dependency as unresolved.
+
+## Adding a package
+
+A new workspace joins the turbo graph by what it declares, nothing else registers it:
+
+- `check-types: "tsc --noEmit"` and, if it has tests, `test:unit: "vitest run"` — these names are
+  what `verify` fans out to.
+- `tsconfig.json` extending `@pieceofit/typescript-config/<base|bun|react|library>.json`.
+- `oxlint`, `oxfmt`, `typescript` as `"catalog:"` dependencies; workspace configs as
+  `"workspace:*"`.
+- `oxlint.config.ts` / `oxfmt.config.ts` only if its rules differ from the root's.
+
 ## Dependencies
 
 `oxlint`, `oxfmt` and `typescript` are pinned once in the Bun `catalog` in the root
@@ -54,9 +109,16 @@ versions to ranges.
 
 ## Conventions
 
-Project-agnostic house rules live in `.claude/rules/` and load automatically.
+Project-agnostic house rules live in `.claude/rules/` and load automatically:
+`module-architecture.md` (folder-per-module, barrels, naming, where a helper goes) and
+`code-comments.md` (comment the _why_, doc the public surface). Plans are persisted through the
+**`plan` skill**, which owns their format and location.
 
-The reasoning behind the non-obvious choices — why the checks live at the root, why entry points
-and turbo tasks have different names, why the hooks do not auto-fix — is in
-[README.md](README.md). Read it before changing the tooling setup; several entries exist
-specifically to stop a plausible-looking approach from being retried.
+The reasoning behind the non-obvious choices — and the alternatives that were tried and reverted
+— lives next to what it explains: tooling decisions (hooks, knip, the nested configs, the
+standalone-binary build) in
+[`apps/llm-translator/docs/decisions.md`](apps/llm-translator/docs/decisions.md), the root-vs-nested
+config split in the comments inside `oxlint.config.ts` / `oxfmt.config.ts`, and the
+`deps:reinstall` vs `deps:reset` distinction in [README.md](README.md). Read the relevant one
+before changing the tooling setup; several entries exist specifically to stop a plausible-looking
+approach from being retried.
