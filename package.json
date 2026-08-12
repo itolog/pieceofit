@@ -37,7 +37,7 @@
   "devDependencies": {
     "@pieceofit/oxfmt-config": "workspace:*",
     "@pieceofit/oxlint-config": "workspace:*",
-    "knip": "6.32.1",
+    "knip": "6.32.2",
     "lefthook": "2.1.10",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",

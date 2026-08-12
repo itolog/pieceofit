@@ -1,11 +1,12 @@
 {
   "extends": "@pieceofit/typescript-config/bun.json",
   "compilerOptions": {
-    // Ink uses React but not the new JSX transform - keep the classic runtime.
+    // ? Ink uses React but not the new JSX transform - keep the classic runtime.
     "jsx": "react",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "*.config.ts"]
+  "include": ["src/**/*", "*.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }
