@@ -7,21 +7,15 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
-    "//#quality": {
-      "dependsOn": ["//#quality:lint", "//#quality:format"]
-    },
-    "//#quality:lint": {
+    "//#lint": {
       "inputs": ["$TURBO_DEFAULT$", "!**/*.md"]
     },
-    "//#quality:format": {},
-    "//#quality:fix": {
-      "dependsOn": ["//#fix:format"]
-    },
-    "//#fix:lint": {
+    "//#format": {},
+    "//#lint:fix": {
       "cache": false
     },
-    "//#fix:format": {
-      "dependsOn": ["//#fix:lint"],
+    "//#format:fix": {
+      "dependsOn": ["//#lint:fix"],
       "cache": false
     },
     "//#knip": {
@@ -29,14 +23,14 @@
     },
     "check-types": {
       "dependsOn": ["^check-types"],
-      "inputs": ["$TURBO_DEFAULT$", "!README.md", "!CLAUDE.md"]
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "test:unit": {
-      "inputs": ["$TURBO_DEFAULT$", "!README.md", "!CLAUDE.md"]
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"]
     }
   }
 }

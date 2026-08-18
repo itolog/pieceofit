@@ -38,10 +38,16 @@ it often. A green package-level check means nothing while the repo is red, which
 | `bun run check-types`  | `tsc` in every package              |
 | `bun run check-unused` | knip, whole repo                    |
 
-Scripts that name a tool (`quality:lint`, `quality:format`, `fix:lint`, `fix:format`, `knip`) are
-the bodies of turbo tasks, not entry points — calling them directly works but skips the cache.
-In `turbo.json` those root-only tasks carry the `//#` prefix; everything without it (`build`,
-`dev`, `check-types`, `test:unit`) fans out to the workspaces.
+Scripts that name a tool (`lint`, `format`, `lint:fix`, `format:fix`, `knip`) are the bodies of
+turbo tasks, not entry points — calling them directly works but skips the cache. In `turbo.json`
+those root-only tasks carry the `//#` prefix; everything without it (`build`, `dev`,
+`check-types`, `test:unit`) fans out to the workspaces.
+
+`//#lint` is deliberately not named `lint:root` the way Turborepo's own example does. There the
+suffix distinguishes a root task covering only the root directory's files from a `lint` that
+fans out to the packages; here a single `oxlint .` covers the whole repo, packages included, so
+`:root` would promise less than the task delivers. The plain name also leaves room for a future
+package-level `lint` — `turbo run lint` would then pick up both without renaming anything.
 
 **Every tool runs on the Bun runtime, not Node** — `bunfig.toml` sets `[run] bun = true`, so
 `vitest`, `turbo`, `tsc`, `oxlint` and `knip` execute on Bun even where they ship a `node`
@@ -88,6 +94,15 @@ presets compose by object spread.
 Knip is configured once in the root `knip.json`, with per-workspace settings under `workspaces`.
 It cannot be run from inside a package: started there it cannot see the root `catalog` and
 reports every `catalog:` dependency as unresolved.
+
+Two things about `turbo.json` that look like oversights and are not. Its root tasks carry
+`inputs` that exclude `!**/*.md` — except `//#format`, because **oxfmt formats the ts
+code blocks inside markdown**, so `.md` files really are part of that task's input (oxfmt sees
+147 files where oxlint sees 118). And there are no umbrella tasks aggregating lint+format: a
+root task registered without a matching root script runs as `<NONEXISTENT>`, a silent no-op that
+turbo omits from its own task counts. `turbo run` takes several task names at once, so the root
+scripts list them (`turbo run lint format`) instead. Don't add explanatory
+comments to `turbo.json` — `bun run fix` strips them.
 
 ## Adding a package
 

@@ -7,8 +7,8 @@
       "packages/*"
     ],
     "catalog": {
-      "oxfmt": "0.63.0",
-      "oxlint": "1.78.0",
+      "oxfmt": "0.64.0",
+      "oxlint": "1.79.0",
       "typescript": "7.0.2"
     }
   },
@@ -17,16 +17,16 @@
     "prepare": "lefthook install",
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "quality:lint": "oxlint .",
-    "quality:format": "oxfmt --check .",
-    "fix": "turbo run quality:fix",
-    "fix:lint": "oxlint --fix .",
-    "fix:format": "oxfmt --write .",
-    "check": "turbo run quality",
+    "lint": "oxlint .",
+    "format": "oxfmt --check .",
+    "fix": "turbo run lint:fix format:fix",
+    "lint:fix": "oxlint --fix .",
+    "format:fix": "oxfmt --write .",
+    "check": "turbo run lint format",
     "check-types": "turbo run check-types",
     "knip": "knip",
     "check-unused": "turbo run knip",
-    "verify": "turbo run quality check-types test:unit knip",
+    "verify": "turbo run lint format check-types test:unit knip",
     "test:unit": "turbo run test:unit",
     "deps:audit": "bun audit",
     "deps:outdated": "bun outdated --filter='*'",
@@ -41,7 +41,7 @@
     "lefthook": "2.1.10",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
-    "turbo": "2.10.9"
+    "turbo": "2.10.11"
   },
   "devEngines": {
     "packageManager": {
