@@ -30,18 +30,111 @@ graph: ~2 s cold, single-digit milliseconds when nothing changed, so there is no
 it often. A green package-level check means nothing while the repo is red, which is why the only
 `verify` lives at the root.
 
-| Command                | What it covers                      |
-| ---------------------- | ----------------------------------- |
-| `bun run verify`       | **everything below** — run this one |
-| `bun run check`        | oxlint + oxfmt, whole repo          |
-| `bun run fix`          | the autofixable half of `check`     |
-| `bun run check-types`  | `tsc` in every package              |
-| `bun run check-unused` | knip, whole repo                    |
+| Command                | What it covers                                  |
+| ---------------------- | ----------------------------------------------- |
+| `bun run verify`       | **everything below** — run this one             |
+| `bun run check`        | oxlint + oxfmt, whole repo                      |
+| `bun run fix`          | the autofixable half of `check`                 |
+| `bun run check-types`  | `tsc` in every package, plus the root's own     |
+| `bun run check-unused` | knip, whole repo                                |
+| `bun run menu`         | pick any workspace script instead of `--filter` |
 
-Scripts that name a tool (`lint`, `format`, `lint:fix`, `format:fix`, `knip`) are the bodies of
-turbo tasks, not entry points — calling them directly works but skips the cache. In `turbo.json`
-those root-only tasks carry the `//#` prefix; everything without it (`build`, `dev`,
-`check-types`, `test:unit`) fans out to the workspaces.
+Scripts that name a tool (`lint`, `format`, `lint:fix`, `format:fix`, `knip`,
+`check-types:root`) are the bodies of turbo tasks, not entry points — calling them directly
+works but skips the cache. In `turbo.json` those root-only tasks carry the `//#` prefix;
+everything without it (`build`, `dev`, `check-types`, `test:unit`) fans out to the workspaces.
+
+`check-types` is the one name that exists in both forms: the fan-out task type-checks each
+package against its own `tsconfig`, and `//#check-types:root` covers what no package owns —
+`scripts/` and the root `*.config.ts`, through the root `tsconfig.json`. Here the `:root` suffix
+is honest (unlike `//#lint`, which really does cover the whole repo), and the two are listed
+side by side in `check-types` and `verify` because `turbo run check-types` alone would skip the
+root one.
+
+### The task menu
+
+`bun run menu` is a terminal picker over every script declared in the repo — the root's and
+each workspace's — so running one doesn't mean spelling out `bun run --filter <pkg> <script>`.
+Type to filter (workspace name, script name and script body all match), ↑↓ to move, `→`/Enter to
+open a section, `←` to close it, Enter on a task to run it, Ctrl+U to clear the filter, Esc to
+quit; `bun run menu <words>` opens with the filter prefilled.
+
+The list is **grouped by workspace** and **collapsed by default** — one header per package, `→`
+or Enter opens a section, `←` closes it (from a task too, which folds its section and parks the
+cursor on the header). Headers are cursor stops like tasks; a sticky header keeps the current
+package visible while scrolling.
+
+A filter overrides the folding: while you type, every section holding a match is open, because
+a hit you cannot see is the same as no hit. `expanded` is consulted only on an empty filter,
+which is also why `←`/`→` do nothing while filtering — the next keystroke would reopen what you
+just closed.
+
+The last 5 runs sit in a `recent` section at the top, the only one open at start-up, with the
+cursor already on its newest entry — repeating the last command is one Enter. It shows only on
+an empty filter, for the same reason the sections auto-open: once you are typing you are aiming
+at a specific script, and the shortcuts would just duplicate entries further down. History lives
+in `node_modules/.cache/task-menu/history.json` — per checkout, already git-ignored, and free to
+lose. Section folding is deliberately **not** persisted: a menu that opens the same way every
+time is one you can drive without looking.
+
+Key input is not one-chunk-one-key, which `ui/terminal-view` owns entirely. A `data` event can
+carry several presses, and the tty can split an escape sequence across two events — a
+half-received `ESC [` is buffered for `PENDING_KEY_MS` and prepended to the next chunk,
+otherwise its `C` lands in the filter as a letter. The same timer disambiguates a lone `ESC`
+(quit) from the head of an arrow key.
+
+`bun run menu:build` compiles the picker to `./menu` in the repo root (git-ignored, ~61 MB, per
+machine), so `./menu` from anywhere in the tree opens it. The binary finds the repo by walking
+up from the working directory to the first `package.json` with `workspaces` — `import.meta.url`
+is useless there, since a compiled binary's own path is inside Bun's `/$bunfs/`. Start-up is
+~10 ms faster than `bun run menu`; the point is the shorter command, not the speed.
+
+#### Layout
+
+The entry point is **`scripts/menu.ts`** — a composition root and nothing else: it picks the
+view implementation, hands the process's arguments in, and turns the result into an exit code.
+Everything under it follows `.claude/rules/module-architecture.md` (folder per module, barrel,
+role suffixes), with one extra split:
+
+```
+scripts/menu.ts                  entry point — picks the view, exits with the code
+scripts/task-menu/
+  index.ts                       public API: runMenu + createTerminalView
+  run-menu.service.ts            the use case: find root → collect → pick → remember → run
+  task-menu.type.ts              Task, Row, MenuState, MenuAction, MenuModel, MenuView (port)
+  pick-task/                     the loop that joins a view to the reducer
+  core/                          what the menu *is* — no terminal anywhere
+    collect-tasks/  filter-tasks/  menu-rows/  menu-state/
+    task-history/   run-task/      repo-root/   package-json/
+  ui/
+    terminal-view/               what the menu *looks like* — raw stdin + ANSI
+```
+
+**`core/` must never import `ui/`** — enforced by `no-restricted-imports` in
+`scripts/oxlint.config.ts`, not just documented, because one convenient import is all it takes
+to weld the two together. The traffic between them is the `MenuView` port: a view gets a
+`MenuModel` to draw and reports a `MenuAction`; it never sees `MenuState`, and it decides only
+that `→` means `open`, never what opening does. Every behavioural rule — which rows the cursor
+visits, what Enter means on a header versus a task, when folding is allowed — lives in
+`core/menu-state`'s reducer.
+
+Swapping the UI (OpenTUI, Ink, anything) is therefore: add `ui/<name>-view/` implementing
+`MenuView`, change the one import in `scripts/menu.ts`. `core/` compiles untouched. Read the
+OpenTUI trade-offs in this file's history before reaching for it — its `bun:ffi` core does not
+survive `bun build --compile` today.
+
+The module lives in `scripts/task-menu/` (the folder is not `scripts/menu/`, because a
+`menu.ts` file next to a `menu/` folder makes `./menu` ambiguous) and deliberately depends on
+**nothing**: the picker is raw-mode stdin plus ANSI escapes, not Ink. Ink was tried first and
+reverted — adding it to the root
+`package.json` gives the repo a second copy of Ink (the app's own resolves through its
+`react-devtools-core` stub, so bun can't dedupe them), `ink-testing-library` then binds to the
+root copy while the components under test use the app's, and 15 of the app's input tests fail on
+two Ink instances. Don't add a React/Ink dependency at the root to make this menu prettier.
+
+The chosen script runs via `bun run <script>` with `cwd` set to its workspace, **not** through
+`bun run --filter`: the filtered form prefixes and buffers the child's output, which breaks
+anything interactive (`dev` is an Ink app, `deps:update` prompts).
 
 `//#lint` is deliberately not named `lint:root` the way Turborepo's own example does. There the
 suffix distinguishes a root task covering only the root directory's files from a `lint` that

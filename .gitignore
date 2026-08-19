@@ -27,6 +27,9 @@ out/
 build
 dist
 
+# Compiled task menu (`bun run menu:build`) — a per-machine binary
+/menu
+
 
 # Debug
 npm-debug.log*

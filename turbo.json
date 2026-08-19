@@ -25,6 +25,9 @@
       "dependsOn": ["^check-types"],
       "inputs": ["$TURBO_DEFAULT$", "!**/*.md"]
     },
+    "//#check-types:root": {
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"]
+    },
     "dev": {
       "cache": false,
       "persistent": true

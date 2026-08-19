@@ -1,0 +1,11 @@
+{
+  "extends": "@pieceofit/typescript-config/bun.json",
+  "compilerOptions": {
+    // ! Deliberately no `paths` here: Bun matches a ROOT tsconfig's aliases
+    // against realpaths under `node_modules/.bun/`, so an alias added at this
+    // level would rewrite imports inside third-party packages too.
+    // See apps/llm-translator/docs/decisions.md, "Runtime & build".
+  },
+  "include": ["scripts/**/*", "*.config.ts"],
+  "exclude": ["node_modules", "apps", "packages"]
+}

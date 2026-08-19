@@ -15,6 +15,8 @@
   "type": "module",
   "scripts": {
     "prepare": "lefthook install",
+    "menu": "bun scripts/menu.ts",
+    "menu:build": "bun build scripts/menu.ts --compile --minify --outfile menu",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "oxlint .",
@@ -23,10 +25,11 @@
     "lint:fix": "oxlint --fix .",
     "format:fix": "oxfmt --write .",
     "check": "turbo run lint format",
-    "check-types": "turbo run check-types",
+    "check-types": "turbo run check-types check-types:root",
+    "check-types:root": "tsc --noEmit",
     "knip": "knip",
     "check-unused": "turbo run knip",
-    "verify": "turbo run lint format check-types test:unit knip",
+    "verify": "turbo run lint format check-types check-types:root test:unit knip",
     "test:unit": "turbo run test:unit",
     "deps:audit": "bun audit",
     "deps:outdated": "bun outdated --filter='*'",
@@ -37,11 +40,14 @@
   "devDependencies": {
     "@pieceofit/oxfmt-config": "workspace:*",
     "@pieceofit/oxlint-config": "workspace:*",
+    "@pieceofit/typescript-config": "workspace:*",
+    "@types/bun": "1.3.14",
     "knip": "6.32.2",
     "lefthook": "2.1.10",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
-    "turbo": "2.10.11"
+    "turbo": "2.10.11",
+    "typescript": "catalog:"
   },
   "devEngines": {
     "packageManager": {

@@ -8,6 +8,12 @@ A Bun + Turborepo monorepo.
 `bun` is the only runner. `bun run` with no argument lists every script; `bun run verify` at
 the root is the finish line — lint, format, types, tests and dead code in one turbo graph.
 
+`bun run menu` opens a picker over every script in the repo, grouped into collapsed sections per
+workspace, with the last 5 runs open on top — `→` opens a section, type to filter (matching
+sections open themselves), Enter runs the script in its own workspace.
+`bun run menu <words>` starts with the filter prefilled. `bun run menu:build` compiles it to
+`./menu` (git-ignored) so the same picker is one command from anywhere in the tree.
+
 ## Reinstalling dependencies
 
 `deps:reinstall` wipes `node_modules` — the root one **and** the one every workspace keeps of
