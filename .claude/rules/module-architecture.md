@@ -51,8 +51,8 @@ implementation to hide behind a barrel, so wrapping it in one buys nothing: it
 stays a **flat file**, imported by its full path.
 
 ```ts
-import { Message } from "@/types/message.type"; // ✅ flat, full path
 import { Message } from "@/types/message"; // ❌ folder + barrel around a type file
+import { Message } from "@/types/message.type"; // ✅ flat, full path
 ```
 
 Most of them never leave their owning module (`*.type.ts` / `*.model.ts` next to

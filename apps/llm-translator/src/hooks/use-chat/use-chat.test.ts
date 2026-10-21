@@ -84,6 +84,34 @@ const fakeStats = {
 // The service now returns { text, stats }; helper to build that shape.
 const translationResult = (text: string) => ({ text, stats: fakeStats });
 
+// Starts a translation that stays in flight until the returned `resolve` is
+// called, so submits during loading can be exercised.
+async function startPendingTranslation(
+  result: { current: ReturnType<typeof useChat> },
+  text = "hello",
+) {
+  let resolve!: (value: ReturnType<typeof translationResult>) => void;
+  mockTranslate.mockReturnValue(
+    new Promise((res) => {
+      resolve = res;
+    }),
+  );
+
+  let submitted!: Promise<void>;
+  act(() => result.current.setInput(text));
+  await act(async () => {
+    submitted = result.current.submit();
+  });
+  expect(result.current.isLoading).toBe(true);
+
+  return async () => {
+    await act(async () => {
+      resolve(translationResult("bonjour"));
+      await submitted;
+    });
+  };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockCheckModel.mockResolvedValue({ status: "available" });
@@ -383,34 +411,6 @@ describe("useChat", () => {
     await submitText(result, "hello");
     expect(mockTranslate).toHaveBeenCalledTimes(1);
   });
-
-  // Starts a translation that stays in flight until the returned `resolve` is
-  // called, so submits during loading can be exercised.
-  async function startPendingTranslation(
-    result: { current: ReturnType<typeof useChat> },
-    text = "hello",
-  ) {
-    let resolve!: (value: ReturnType<typeof translationResult>) => void;
-    mockTranslate.mockReturnValue(
-      new Promise((res) => {
-        resolve = res;
-      }),
-    );
-
-    let submitted!: Promise<void>;
-    act(() => result.current.setInput(text));
-    await act(async () => {
-      submitted = result.current.submit();
-    });
-    expect(result.current.isLoading).toBe(true);
-
-    return async () => {
-      await act(async () => {
-        resolve(translationResult("bonjour"));
-        await submitted;
-      });
-    };
-  }
 
   it("does not start a second translation while one is in flight", async () => {
     const { result } = setup();

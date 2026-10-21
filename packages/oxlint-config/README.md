@@ -16,6 +16,7 @@ Add the package plus `oxlint` itself to the consuming app, and drop an
 
 ```ts
 import { defineConfig } from "oxlint";
+
 import react from "@pieceofit/oxlint-config/react";
 
 export default defineConfig({

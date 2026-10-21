@@ -18,6 +18,7 @@ Drop an `oxfmt.config.ts` next to the consumer's `package.json`:
 
 ```ts
 import { defineConfig } from "oxfmt";
+
 import react from "@pieceofit/oxfmt-config/react";
 
 export default defineConfig({ ...react });
