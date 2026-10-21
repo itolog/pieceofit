@@ -87,6 +87,15 @@ a path into `node_modules` — and it means `tsc` type-checks them (they are in 
   Note that a nested config **replaces** the repo-root one rather than merging with it, so
   what is written here (plus what it `extends`) is exactly what applies — including when
   oxlint is invoked from the repo root.
+  The one exception is **type-aware linting**: `options.typeAware` is read from the root
+  config only (oxlint ignores it in nested ones), and it is a switch for the whole run, so
+  it lives in the root `oxlint.config.ts` and covers this app too. The `typescript/*`
+  type-aware rules themselves (`no-floating-promises`, `no-misused-promises`) are ordinary
+  rules in the shared base. They run through `oxlint-tsgolint`, a separate binary that
+  oxlint spawns — so it is a root devDependency, next to the oxlint that launches it, not
+  a dependency of the preset package. It builds one program per `tsconfig.json`; files
+  outside every tsconfig (the presets, root configs) get no type information and skip
+  those rules.
 - **Format:** [oxfmt](https://oxc.rs/) — `oxfmt.config.ts` spreads
   `@pieceofit/oxfmt-config/react` (the `react` import group is the only thing that preset
   adds over `./base`). oxfmt has no `extends` at all, and silently ignores the key if you

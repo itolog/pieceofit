@@ -4,11 +4,12 @@
 // `cause.code === "ECONNREFUSED"`), so both places are checked.
 const REFUSED_CODES = new Set(["ConnectionRefused", "ECONNREFUSED"]);
 
-const hasRefusedCode = (value: unknown): boolean => {
-  if (typeof value !== "object" || value === null) return false;
-  const { code } = value as { code?: unknown };
-  return typeof code === "string" && REFUSED_CODES.has(code);
-};
+const hasRefusedCode = (value: unknown): boolean =>
+  typeof value === "object" &&
+  value !== null &&
+  "code" in value &&
+  typeof value.code === "string" &&
+  REFUSED_CODES.has(value.code);
 
 /**
  * Whether `error` is a connection refused by the host — i.e. nothing is
@@ -17,5 +18,10 @@ const hasRefusedCode = (value: unknown): boolean => {
  */
 export function isConnectionRefused(error: unknown): boolean {
   if (hasRefusedCode(error)) return true;
-  return hasRefusedCode((error as { cause?: unknown } | null)?.cause);
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "cause" in error &&
+    hasRefusedCode(error.cause)
+  );
 }

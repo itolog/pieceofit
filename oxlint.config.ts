@@ -13,4 +13,7 @@ export default defineConfig({
   // code. Apps restate their own globals, since `env` is not inherited.
   env: { node: true },
   ignorePatterns: ["**/dist/**"],
+  // ! Root-only: oxlint ignores `typeAware` in nested configs, so it can't move
+  // into the shared base.
+  options: { typeAware: true },
 });

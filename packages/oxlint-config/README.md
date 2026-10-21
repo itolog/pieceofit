@@ -4,10 +4,10 @@ Shared [oxlint](https://oxc.rs/docs/guide/usage/linter) configurations, written
 as TypeScript configs so consumers can import them as **packages** rather than
 as file paths.
 
-| Export    | Adds                                                                                                                     |
-| --------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `./base`  | plugins `typescript`, `unicorn`, `oxc`, `import`; `correctness: error` + `suspicious: warn`; `import/no-cycle`; `es2026` |
-| `./react` | `base` + plugins `react`, `react-perf`, `jsx-a11y`; `react-hooks/*`                                                      |
+| Export    | Adds                                                                                                                                                                                           |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `./base`  | plugins `typescript`, `unicorn`, `oxc`, `import`; `correctness: error` + `suspicious: warn`; `import/no-cycle`; `typescript/no-floating-promises` + `typescript/no-misused-promises`; `es2026` |
+| `./react` | `base` + plugins `react`, `react-perf`, `jsx-a11y`; `react-hooks/*`                                                                                                                            |
 
 ## Usage
 
@@ -68,6 +68,15 @@ Inside an `overrides` entry it _does_ carry across, which is how `base.ts` share
 the `es2026` language level. Runtime globals (`node`, `browser`) deliberately
 stay in the consumer, since they differ per app. `.gitignore` is honoured on top
 of `ignorePatterns`.
+
+## Type-aware rules
+
+The two `typescript/*` promise rules in `./base` need type information, which only
+`oxlint-tsgolint` provides. They run only while the **repo-root** config sets
+`options: { typeAware: true }` — oxlint reads that option from the root config alone,
+so it cannot ship in this preset. `oxlint-tsgolint` is a root devDependency for the
+same reason: it is a binary the root oxlint run spawns, not something this package
+imports.
 
 ## On `suspicious`
 

@@ -123,7 +123,7 @@ export function useModel({ addMessage }: UseModelOptions) {
   }, [addMessage, reportTagsFailure]);
 
   useEffect(() => {
-    initModel();
+    void initModel();
   }, [initModel]);
 
   // Switches the active model (shared by `/model <name>` and the picker).

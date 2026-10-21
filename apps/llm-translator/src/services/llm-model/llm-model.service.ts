@@ -19,6 +19,7 @@ import {
 } from "./llm-model.type";
 import { prompt } from "./llm-prompt";
 import { buildStats } from "./utils/build-stats";
+import { isTagsResponse } from "./utils/is-tags-response";
 import { modelMatches } from "./utils/model-matches";
 
 // Stateful wrapper around Ollama: the single source of truth for the active
@@ -161,7 +162,9 @@ class LlmModelService {
       // Ollama up on this host?") — so it maps to the same status instead of
       // growing a branch nobody can act on differently.
       if (!res.ok) return { status: "unreachable" };
-      const data = (await res.json()) as { models?: OllamaTag[] };
+      const data: unknown = await res.json();
+      // A malformed body is "unreachable" for the same reason as `!res.ok`.
+      if (!isTagsResponse(data)) return { status: "unreachable" };
       return { status: "ok", tags: data.models ?? [] };
     } catch (error) {
       // This request has no caller signal — only our own timeout can abort it,

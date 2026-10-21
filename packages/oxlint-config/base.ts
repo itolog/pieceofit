@@ -14,6 +14,8 @@ export default defineConfig({
     // Circular-dependency detection; reads tsconfig for the `@/*` alias, so no
     // separate madge/dpdm is needed.
     "import/no-cycle": "error",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
   },
   // ! A top-level `env` is NOT inherited through `extends` — not even in a TS
   // config, where everything else merges. Inside `overrides` it does carry

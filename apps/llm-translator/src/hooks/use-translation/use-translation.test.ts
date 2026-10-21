@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { OLLAMA_UNREACHABLE_NOTICE } from "@/models/ollama-notice.model";
 import { Message } from "@/types/message.type";
@@ -49,10 +49,10 @@ function setup(overrides: Partial<UseTranslationOptions> = {}) {
 }
 
 // The id of the bot message appended up front (updateMessage targets it).
-const appendedId = (appendMessage: ReturnType<typeof vi.fn>) => {
+const appendedId = (appendMessage: Mock<(message: Message) => void>) => {
   const call = appendMessage.mock.calls[0];
   if (!call) throw new Error("expected appendMessage to have been called");
-  return (call[0] as Message).id;
+  return call[0].id;
 };
 
 beforeEach(() => {

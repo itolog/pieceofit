@@ -76,7 +76,8 @@ export const App = () => {
         .with({ modelItems: P.nonNullable }, (matched) => (
           <ModelPicker
             items={matched.modelItems}
-            onSelect={selectModel}
+            // `void` is safe: chat actions never reject, failures become messages.
+            onSelect={(nextModel) => void selectModel(nextModel)}
             onCancel={cancelModelPicker}
           />
         ))
@@ -91,7 +92,7 @@ export const App = () => {
           <InputBar
             value={input}
             onChange={setInput}
-            onSubmit={submit}
+            onSubmit={() => void submit()}
             isLoading={isLoading}
             onCancel={cancelTranslation}
           />
