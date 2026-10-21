@@ -93,9 +93,33 @@ a path into `node_modules` — and it means `tsc` type-checks them (they are in 
   type-aware rules themselves (`no-floating-promises`, `no-misused-promises`) are ordinary
   rules in the shared base. They run through `oxlint-tsgolint`, a separate binary that
   oxlint spawns — so it is a root devDependency, next to the oxlint that launches it, not
-  a dependency of the preset package. It builds one program per `tsconfig.json`; files
-  outside every tsconfig (the presets, root configs) get no type information and skip
-  those rules.
+  a dependency of the preset package. Coverage is wider than this app's `include`: the
+  shared presets are part of its program through their imports, and files outside every
+  tsconfig (the root `oxlint.config.ts` / `oxfmt.config.ts`) still get type information —
+  `no-floating-promises` fires there too.
+  **A broken `tsconfig.json` hides every type-aware finding** for its program: oxlint
+  reports only `Invalid tsconfig`, without naming the cause. Run `tsc --noEmit` in the
+  package to see which option is wrong. The run still fails, so nothing slips through,
+  but the other findings only appear once the tsconfig is fixed.
+- **Type check:** `tsc --noEmit`, per package, as the `check-types` turbo task. oxlint's
+  `options.typeCheck` / `--type-check` (which adds TypeScript's own errors to the lint run)
+  was evaluated against it with oxlint 1.89 and `oxlint-tsgolint` 7.0.2004, and **not
+  adopted**. On the whole program it reports the same errors as `tsc` — same TypeScript
+  7.0.2 underneath — but:
+  - it reports type errors only for the files being linted, and pre-commit lints staged
+    files only, so a caller broken by a signature change in another file would get
+    through; `tsc` checks the whole program;
+  - a broken `tsconfig.json` comes out as a bare `Invalid tsconfig` (see above), where
+    `tsc` names the offending option;
+  - it moves type checking from the per-package, separately cached `check-types` into the
+    root lint task, which reruns on any change anywhere in the repo;
+  - the flag is marked experimental.
+
+  The gain does not pay for that: about 150 ms less CPU per run, no change to `verify`
+  wall time (its tasks run in parallel), and type checking of the two root config files,
+  which no tsconfig covers. Revisit once the flag is no longer experimental and reports
+  tsconfig errors properly.
+
 - **Format:** [oxfmt](https://oxc.rs/) — `oxfmt.config.ts` spreads
   `@pieceofit/oxfmt-config/react` (the `react` import group is the only thing that preset
   adds over `./base`). oxfmt has no `extends` at all, and silently ignores the key if you
