@@ -1,13 +1,9 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 
-import { ThemePreference } from "@/services/theme";
+import { ThemeOption } from "./theme-toggle.type";
 
-export const THEME_OPTIONS: {
-  value: ThemePreference;
-  label: string;
-  icon: typeof Sun;
-}[] = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
+export const THEME_OPTIONS: ThemeOption[] = [
+  { value: "light", labelKey: "theme.light", icon: Sun },
+  { value: "dark", labelKey: "theme.dark", icon: Moon },
+  { value: "system", labelKey: "theme.system", icon: Monitor },
 ];

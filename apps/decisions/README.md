@@ -6,7 +6,8 @@ These models take a `state` (text, JSON or images) and typed questions, and retu
 probabilities instead of generated text.
 
 Stack: Vite, React, [shadcn/ui](https://ui.shadcn.com/), [zod](https://zod.dev/),
-[react-hook-form](https://react-hook-form.com/), [Nivo](https://nivo.rocks/).
+[react-hook-form](https://react-hook-form.com/), [Nivo](https://nivo.rocks/),
+[i18next](https://www.i18next.com/).
 
 ## Run
 
@@ -21,7 +22,9 @@ start blank, edit the state and the questions, and press **Decide** (or ⌘/Ctrl
 The answers panel shows each answer: a meter for yes/no, and a [Nivo](https://nivo.rocks/)
 bar chart for choice and score with the model's pick highlighted (hover a bar for its
 value), plus the raw request and response JSON. The theme switch in the header offers
-light, dark or the system setting, and remembers the choice.
+light, dark or the system setting, and remembers the choice. The language switch
+offers English and Ukrainian; on the first visit the language comes from the browser
+settings.
 
 The page talks to Ollama through the dev server's `/ollama` proxy, so Ollama needs no
 CORS setup. That also means it needs `bun run dev` or `bun run preview`: a static

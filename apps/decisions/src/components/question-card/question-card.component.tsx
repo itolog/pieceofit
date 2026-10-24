@@ -1,16 +1,13 @@
 import { Trash2 } from "lucide-react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { ChoiceOptionsField } from "@/components/choice-options-field";
+import { FormFieldError } from "@/components/form-field-error";
 import { ScoreLevelsField } from "@/components/score-levels-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -23,10 +20,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { QUESTION_TYPES } from "@/models/decision.model";
 import { DecisionFormValues } from "@/types/decision-form.type";
 
-import {
-  QUESTION_TYPE_HINTS,
-  QUESTION_TYPE_LABELS,
-} from "./question-card.model";
 import { QuestionCardProps } from "./question-card.type";
 import { questionFieldId } from "./utils/question-field-id";
 
@@ -37,6 +30,7 @@ export const QuestionCard = ({
   canRemove,
   onRemove,
 }: QuestionCardProps) => {
+  const { t } = useTranslation();
   const { control, register, formState } = useFormContext<DecisionFormValues>();
   const type = useWatch({ control, name: `questions.${index}.type` });
   const errors = formState.errors.questions?.[index];
@@ -45,7 +39,9 @@ export const QuestionCard = ({
     <Card size="sm">
       <CardHeader className="flex flex-row items-start gap-2">
         <Field data-invalid={Boolean(errors?.name)} className="flex-1">
-          <FieldLabel htmlFor={questionFieldId(index, "name")}>Key</FieldLabel>
+          <FieldLabel htmlFor={questionFieldId(index, "name")}>
+            {t("question.key")}
+          </FieldLabel>
           <Input
             {...register(`questions.${index}.name`)}
             id={questionFieldId(index, "name")}
@@ -53,7 +49,7 @@ export const QuestionCard = ({
             placeholder="urgent"
             className="font-mono"
           />
-          <FieldError errors={[errors?.name]} />
+          <FormFieldError error={errors?.name} />
         </Field>
         <Controller
           control={control}
@@ -61,7 +57,7 @@ export const QuestionCard = ({
           render={({ field }) => (
             <Field className="w-36">
               <FieldLabel htmlFor={questionFieldId(index, "type")}>
-                Type
+                {t("question.type")}
               </FieldLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger
@@ -72,7 +68,7 @@ export const QuestionCard = ({
                 <SelectContent>
                   {QUESTION_TYPES.map((value) => (
                     <SelectItem key={value} value={value}>
-                      {QUESTION_TYPE_LABELS[value]}
+                      {t(`question.types.${value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -85,7 +81,7 @@ export const QuestionCard = ({
           variant="ghost"
           size="icon"
           className="mt-6"
-          aria-label="Remove question"
+          aria-label={t("question.remove")}
           disabled={!canRemove}
           onClick={onRemove}>
           <Trash2 />
@@ -94,39 +90,39 @@ export const QuestionCard = ({
       <CardContent className="flex flex-col gap-4">
         <Field data-invalid={Boolean(errors?.instructions)}>
           <FieldLabel htmlFor={questionFieldId(index, "instructions")}>
-            Question
+            {t("question.text")}
           </FieldLabel>
           <Textarea
             {...register(`questions.${index}.instructions`)}
             id={questionFieldId(index, "instructions")}
             aria-invalid={Boolean(errors?.instructions)}
             rows={2}
-            placeholder="Is this support request urgent?"
+            placeholder={t("question.textPlaceholder")}
           />
-          <FieldDescription>{QUESTION_TYPE_HINTS[type]}</FieldDescription>
-          <FieldError errors={[errors?.instructions]} />
+          <FieldDescription>{t(`question.hints.${type}`)}</FieldDescription>
+          <FormFieldError error={errors?.instructions} />
         </Field>
 
         {type === "noul" && (
           <div className="grid gap-3 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor={questionFieldId(index, "true")}>
-                True means (optional)
+                {t("question.trueMeans")}
               </FieldLabel>
               <Input
                 {...register(`questions.${index}.trueDescription`)}
                 id={questionFieldId(index, "true")}
-                placeholder="Needs a reply within the hour"
+                placeholder={t("question.truePlaceholder")}
               />
             </Field>
             <Field>
               <FieldLabel htmlFor={questionFieldId(index, "false")}>
-                False means (optional)
+                {t("question.falseMeans")}
               </FieldLabel>
               <Input
                 {...register(`questions.${index}.falseDescription`)}
                 id={questionFieldId(index, "false")}
-                placeholder="Can wait for the normal queue"
+                placeholder={t("question.falsePlaceholder")}
               />
             </Field>
           </div>

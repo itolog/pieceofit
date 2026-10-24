@@ -1,0 +1,122 @@
+{
+  "app": {
+    "title": "Decisions",
+    "subtitle": "Ask Ollama decision models typed questions and see the probabilities.",
+    "reloadModels": "Reload models",
+    "loadingModels": "Loading models…",
+    "answers": "Answers",
+    "ollamaUnreachable": {
+      "title": "Cannot reach Ollama",
+      "description": "{{message}}. Start Ollama, or point OLLAMA_URL at it before running the dev server."
+    },
+    "noModels": {
+      "title": "No decision models installed",
+      "description": "Pull one, for example <code>ollama pull d3</code>, then reload models."
+    }
+  },
+  "presets": {
+    "supportTicket": "Support ticket triage",
+    "modelRouter": "Model router",
+    "blank": "Blank"
+  },
+  "form": {
+    "preset": "Preset",
+    "presetHint": "Replaces the state and questions.",
+    "model": "Model",
+    "noModels": "No decision models",
+    "vision": "vision",
+    "state": "State",
+    "statePlaceholder": "What the model should judge: text, or a JSON object / array.",
+    "stateHint": "Valid JSON objects and arrays are sent as structured state.",
+    "images": "Images",
+    "addImages": "Add images",
+    "removeImage": "Remove {{name}}",
+    "imagesHint": "PNG, JPEG or WebP, shared by all questions.",
+    "imagesUnsupported": "This model does not accept images.",
+    "questions": "Questions",
+    "addQuestion": "Add question",
+    "decide": "Decide",
+    "cancel": "Cancel"
+  },
+  "question": {
+    "key": "Key",
+    "type": "Type",
+    "remove": "Remove question",
+    "text": "Question",
+    "textPlaceholder": "Is this support request urgent?",
+    "trueMeans": "True means (optional)",
+    "truePlaceholder": "Needs a reply within the hour",
+    "falseMeans": "False means (optional)",
+    "falsePlaceholder": "Can wait for the normal queue",
+    "types": {
+      "noul": "Yes / no",
+      "choice": "Choice",
+      "score": "Score"
+    },
+    "hints": {
+      "noul": "Returns the probability that the answer is true.",
+      "choice": "Picks one option and returns the probability of each.",
+      "score": "Rates on your scale and returns a probability-weighted level."
+    },
+    "options": {
+      "option": "Option",
+      "description": "Description (optional)",
+      "descriptionPlaceholder": "Outages, errors, and configuration",
+      "nameLabel": "Option {{n}} name",
+      "descriptionLabel": "Option {{n}} description",
+      "remove": "Remove option {{n}}",
+      "add": "Add option"
+    },
+    "levels": {
+      "hint": "Levels, lowest first",
+      "lowPlaceholder": "No impact",
+      "highPlaceholder": "Critical",
+      "label": "Level {{n}} description",
+      "remove": "Remove level {{n}}",
+      "add": "Add level"
+    }
+  },
+  "errors": {
+    "required": "Required",
+    "keyFormat": "Letters, digits, _ and - only",
+    "keyTaken": "Key already used",
+    "optionCount": "Needs {{minOptions}}–{{maxOptions}} options",
+    "levelCount": "Needs {{minOptions}}–{{maxOptions}} levels",
+    "duplicateOption": "Duplicate option",
+    "modelRequired": "Pick a decision model",
+    "questionsMin": "Add at least one question",
+    "questionsMax": "At most {{maxQuestions}} questions",
+    "stateRequired": "Describe the state or attach an image"
+  },
+  "results": {
+    "idle": "Fill in the state and questions, then press <b>Decide</b>.",
+    "loading": "Deciding… the first request also loads the model.",
+    "failed": "Request failed",
+    "pullHint": "Run: ollama pull {{model}}",
+    "elapsed": "{{ms}} ms",
+    "tokens_one": "{{count}} token",
+    "tokens_other": "{{count}} tokens",
+    "tokensInOut": "{{input}} in / {{output}} out tokens",
+    "request": "Request",
+    "response": "Response"
+  },
+  "answer": {
+    "yes": "Yes",
+    "no": "No",
+    "pYes": "P(yes)",
+    "pYesLabel": "Probability of yes",
+    "confidence": "conf {{value}}",
+    "confidenceHint": "How concentrated the probabilities are",
+    "chartLabelChoice": "{{name}}: probability of each option",
+    "chartLabelScore": "{{name}}: probability of each level"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language"
+  }
+}

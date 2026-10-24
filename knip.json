@@ -8,7 +8,11 @@
       }
     },
     "apps/decisions": {
-      "ignore": ["src/components/ui/**", "src/lib/**"],
+      "ignore": [
+        "src/components/ui/**",
+        "src/lib/**",
+        "src/types/i18next.type.ts"
+      ],
       "ignoreExportsUsedInFile": {
         "type": true
       }

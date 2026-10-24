@@ -3,16 +3,20 @@ import { match } from "ts-pattern";
 import { Answer } from "@/services/ollama";
 import { AnswerRow } from "@/types/answer-row.type";
 
+import { AnswerLabels } from "../../answer-card.type";
 import { argmax } from "../argmax";
 
 // Every answer type as the same list of bars, with the model's pick marked:
 // the threshold for yes/no, the chosen option, the most likely score level.
-export const toRows = (answer: Answer): AnswerRow[] => {
+export const toRows = (
+  answer: Answer,
+  { yes, no }: Pick<AnswerLabels, "yes" | "no">,
+): AnswerRow[] => {
   return match(answer)
     .returnType<AnswerRow[]>()
     .with({ type: "noul" }, ({ noul }) => [
-      { label: "Yes", probability: noul, picked: noul >= 0.5 },
-      { label: "No", probability: 1 - noul, picked: noul < 0.5 },
+      { label: yes, probability: noul, picked: noul >= 0.5 },
+      { label: no, probability: 1 - noul, picked: noul < 0.5 },
     ])
     .with({ type: "choice" }, ({ choice, probabilities }) =>
       Object.entries(probabilities).map(([label, probability]) => ({

@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { decide } from "@/services/ollama";
 import { DecisionRequest } from "@/types/decision.type";
+import { errorMessage } from "@/utils/error-message";
 
 import { DecisionStatus } from "./use-decision.type";
-import { describeError } from "./utils/describe-error";
+import { isModelNotFound } from "./utils/is-model-not-found";
 
 // Sends one decision request at a time: a new run aborts the previous one,
 // so only the latest answer ever lands.
@@ -36,10 +37,12 @@ export const useDecision = () => {
       } catch (error) {
         // Superseded or cancelled: whoever aborted already owns the status.
         if (controller.signal.aborted) return;
+        const message = errorMessage(error);
         setStatus({
           kind: "error",
           request,
-          message: describeError(error, request.model),
+          message,
+          modelMissing: isModelNotFound(message),
         });
       }
     },

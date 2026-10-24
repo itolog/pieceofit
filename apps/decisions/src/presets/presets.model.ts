@@ -4,11 +4,15 @@ import supportTicket from "./support-ticket.json";
 // Starting points for the form. Each file is a /v1/systemone body without
 // `model`; adding one here is all it takes to list it in the picker.
 export const PRESETS = [
-  { id: "support-ticket", label: "Support ticket triage", body: supportTicket },
-  { id: "model-router", label: "Model router", body: modelRouter },
+  {
+    id: "support-ticket",
+    labelKey: "presets.supportTicket",
+    body: supportTicket,
+  },
+  { id: "model-router", labelKey: "presets.modelRouter", body: modelRouter },
   {
     id: "blank",
-    label: "Blank",
+    labelKey: "presets.blank",
     body: {
       state: "",
       questions: { question_1: { type: "noul", instructions: "" } },

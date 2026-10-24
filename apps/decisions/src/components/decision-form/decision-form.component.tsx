@@ -9,15 +9,12 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
+import { FormFieldError } from "@/components/form-field-error";
 import { QuestionCard } from "@/components/question-card";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -45,6 +42,7 @@ export const DecisionForm = ({
   onSubmit,
   onCancel,
 }: DecisionFormProps) => {
+  const { t } = useTranslation();
   // useForm reads defaultValues only on mount; the lazy initializer keeps the
   // preset from being re-parsed on every render.
   const [defaultValues] = useState(() =>
@@ -104,7 +102,7 @@ export const DecisionForm = ({
         onSubmit={(event) => void submit(event)}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field>
-            <FieldLabel htmlFor="preset">Preset</FieldLabel>
+            <FieldLabel htmlFor="preset">{t("form.preset")}</FieldLabel>
             <Select defaultValue={DEFAULT_PRESET.id} onValueChange={loadPreset}>
               <SelectTrigger id="preset" className="w-full">
                 <SelectValue />
@@ -112,27 +110,25 @@ export const DecisionForm = ({
               <SelectContent>
                 {PRESETS.map((preset) => (
                   <SelectItem key={preset.id} value={preset.id}>
-                    {preset.label}
+                    {t(preset.labelKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <FieldDescription>
-              Replaces the state and questions.
-            </FieldDescription>
+            <FieldDescription>{t("form.presetHint")}</FieldDescription>
           </Field>
           <Controller
             control={control}
             name="model"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="model">Model</FieldLabel>
+                <FieldLabel htmlFor="model">{t("form.model")}</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger
                     id="model"
                     className="w-full font-mono"
                     aria-invalid={fieldState.invalid}>
-                    <SelectValue placeholder="No decision models" />
+                    <SelectValue placeholder={t("form.noModels")} />
                   </SelectTrigger>
                   <SelectContent>
                     {models.map((model) => (
@@ -143,37 +139,35 @@ export const DecisionForm = ({
                         {model.name}
                         {model.vision && (
                           <span className="text-muted-foreground font-sans text-xs">
-                            vision
+                            {t("form.vision")}
                           </span>
                         )}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <FieldError errors={[fieldState.error]} />
+                <FormFieldError error={fieldState.error} />
               </Field>
             )}
           />
         </div>
 
         <Field data-invalid={Boolean(formState.errors.state)}>
-          <FieldLabel htmlFor="state">State</FieldLabel>
+          <FieldLabel htmlFor="state">{t("form.state")}</FieldLabel>
           <Textarea
             {...register("state")}
             id="state"
             rows={5}
             aria-invalid={Boolean(formState.errors.state)}
-            placeholder="What the model should judge: text, or a JSON object / array."
+            placeholder={t("form.statePlaceholder")}
             className="font-mono text-sm"
           />
-          <FieldDescription>
-            Valid JSON objects and arrays are sent as structured state.
-          </FieldDescription>
-          <FieldError errors={[formState.errors.state]} />
+          <FieldDescription>{t("form.stateHint")}</FieldDescription>
+          <FormFieldError error={formState.errors.state} />
         </Field>
 
         <Field>
-          <FieldLabel>Images</FieldLabel>
+          <FieldLabel>{t("form.images")}</FieldLabel>
           <div className="flex flex-wrap items-center gap-2">
             {images.fields.map((image, index) => (
               <div
@@ -189,7 +183,7 @@ export const DecisionForm = ({
                   variant="secondary"
                   size="icon-xs"
                   className="absolute top-1 right-1"
-                  aria-label={`Remove ${image.name}`}
+                  aria-label={t("form.removeImage", { name: image.name })}
                   onClick={() => images.remove(index)}>
                   <X />
                 </Button>
@@ -200,7 +194,7 @@ export const DecisionForm = ({
               variant="outline"
               disabled={!selectedModel?.vision}
               onClick={() => fileInputRef.current?.click()}>
-              <ImagePlus /> Add images
+              <ImagePlus /> {t("form.addImages")}
             </Button>
             <input
               ref={fileInputRef}
@@ -213,15 +207,15 @@ export const DecisionForm = ({
           </div>
           <FieldDescription>
             {selectedModel?.vision
-              ? "PNG, JPEG or WebP, shared by all questions."
-              : "This model does not accept images."}
+              ? t("form.imagesHint")
+              : t("form.imagesUnsupported")}
           </FieldDescription>
         </Field>
 
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h2 className="font-heading text-base font-medium">
-              Questions{" "}
+              {t("form.questions")}{" "}
               <span className="text-muted-foreground font-normal">
                 {questions.fields.length}/{MAX_QUESTIONS}
               </span>
@@ -239,7 +233,7 @@ export const DecisionForm = ({
                   ),
                 })
               }>
-              <Plus /> Add question
+              <Plus /> {t("form.addQuestion")}
             </Button>
           </div>
           {questions.fields.map((question, index) => (
@@ -250,17 +244,17 @@ export const DecisionForm = ({
               onRemove={() => questions.remove(index)}
             />
           ))}
-          <FieldError errors={[formState.errors.questions?.root]} />
+          <FormFieldError error={formState.errors.questions?.root} />
         </section>
 
         <div className="bg-background/80 sticky bottom-0 flex items-center gap-2 border-t py-3 backdrop-blur">
           <Button type="submit" disabled={busy || models.length === 0}>
             {busy && <Loader2 className="animate-spin" />}
-            Decide
+            {t("form.decide")}
           </Button>
           {busy && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              {t("form.cancel")}
             </Button>
           )}
           <span className="text-muted-foreground ml-auto text-xs">

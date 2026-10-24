@@ -1,4 +1,5 @@
 import { ResponsiveBar } from "@nivo/bar";
+import { useTranslation } from "react-i18next";
 
 import { BarValueLabels } from "@/components/bar-value-labels";
 import { ProbabilityTooltip } from "@/components/probability-tooltip";
@@ -18,6 +19,7 @@ import { toChartData } from "./utils/to-chart-data";
 // One probability bar per option or level, the model's pick emphasised.
 export const ProbabilityChart = ({ rows, label }: ProbabilityChartProps) => {
   const { resolved } = useTheme();
+  const { i18n } = useTranslation();
   const palette = CHART_PALETTE[resolved];
 
   return (
@@ -51,7 +53,7 @@ export const ProbabilityChart = ({ rows, label }: ProbabilityChartProps) => {
         tooltip={ProbabilityTooltip}
         ariaLabel={label}
         barAriaLabel={({ indexValue, value }) =>
-          `${indexValue}: ${formatPercent(value ?? 0)}`
+          `${indexValue}: ${formatPercent(value ?? 0, i18n.language)}`
         }
       />
     </div>

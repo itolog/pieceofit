@@ -1,4 +1,5 @@
 import { listDecisionModels } from "@/services/ollama";
+import { errorMessage } from "@/utils/error-message";
 
 import { ModelsState } from "../../use-models.type";
 
@@ -9,6 +10,6 @@ export const fetchModels = (signal: AbortSignal): Promise<ModelsState> =>
     (models): ModelsState => ({ kind: "ready", models }),
     (error: unknown): ModelsState => ({
       kind: "error",
-      message: error instanceof Error ? error.message : String(error),
+      message: errorMessage(error),
     }),
   );

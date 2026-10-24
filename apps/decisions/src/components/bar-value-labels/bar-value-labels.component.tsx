@@ -1,4 +1,5 @@
 import { useTheme as useNivoTheme } from "@nivo/theming";
+import { useTranslation } from "react-i18next";
 
 import { formatPercent } from "@/utils/format-percent";
 
@@ -10,6 +11,7 @@ import { BarValueLabelsProps } from "./bar-value-labels.type";
 // colour.
 export const BarValueLabels = ({ bars }: BarValueLabelsProps) => {
   const { text } = useNivoTheme();
+  const { i18n } = useTranslation();
   return (
     <g>
       {bars.map((bar) => (
@@ -21,7 +23,7 @@ export const BarValueLabels = ({ bars }: BarValueLabelsProps) => {
           fontSize={12}
           fill={text.fill}
           style={{ fontVariantNumeric: "tabular-nums" }}>
-          {formatPercent(bar.data.value ?? 0)}
+          {formatPercent(bar.data.value ?? 0, i18n.language)}
         </text>
       ))}
     </g>

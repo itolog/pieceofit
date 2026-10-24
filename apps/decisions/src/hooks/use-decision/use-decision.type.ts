@@ -5,4 +5,10 @@ export type DecisionStatus =
   | { kind: "idle" }
   | { kind: "loading"; request: DecisionRequest }
   | { kind: "done"; request: DecisionRequest; result: DecideResult }
-  | { kind: "error"; request: DecisionRequest; message: string };
+  | {
+      kind: "error";
+      request: DecisionRequest;
+      message: string;
+      /** The model is not pulled; the UI offers `ollama pull`. */
+      modelMissing: boolean;
+    };

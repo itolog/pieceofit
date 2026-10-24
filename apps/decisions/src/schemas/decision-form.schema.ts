@@ -6,6 +6,7 @@ import {
   MIN_OPTIONS,
   QUESTION_TYPES,
 } from "@/models/decision.model";
+import { FORM_ERRORS } from "@/models/form-errors.model";
 
 // The form keeps every type's fields on each question, so switching the type
 // does not throw away what was typed. Only the active type's fields are
@@ -15,10 +16,10 @@ const questionSchema = z
     name: z
       .string()
       .trim()
-      .min(1, "Required")
-      .regex(/^[\w-]+$/, "Letters, digits, _ and - only"),
+      .min(1, FORM_ERRORS.required)
+      .regex(/^[\w-]+$/, FORM_ERRORS.keyFormat),
     type: z.enum(QUESTION_TYPES),
-    instructions: z.string().trim().min(1, "Required"),
+    instructions: z.string().trim().min(1, FORM_ERRORS.required),
     trueDescription: z.string(),
     falseDescription: z.string(),
     options: z.array(z.object({ name: z.string(), description: z.string() })),
@@ -39,7 +40,10 @@ const questionSchema = z
       ctx.addIssue({
         code: "custom",
         path: [listPath],
-        message: `Needs ${MIN_OPTIONS}–${MAX_OPTIONS} ${listPath}`,
+        message:
+          question.type === "choice"
+            ? FORM_ERRORS.optionCount
+            : FORM_ERRORS.levelCount,
       });
     }
     const seen = new Set<string>();
@@ -49,13 +53,13 @@ const questionSchema = z
         ctx.addIssue({
           code: "custom",
           path: [listPath, index, field],
-          message: "Required",
+          message: FORM_ERRORS.required,
         });
       } else if (question.type === "choice" && seen.has(key)) {
         ctx.addIssue({
           code: "custom",
           path: [listPath, index, field],
-          message: "Duplicate option",
+          message: FORM_ERRORS.duplicateOption,
         });
       }
       seen.add(key);
@@ -64,22 +68,22 @@ const questionSchema = z
 
 export const decisionFormSchema = z
   .object({
-    model: z.string().min(1, "Pick a decision model"),
+    model: z.string().min(1, FORM_ERRORS.modelRequired),
     state: z.string(),
     images: z.array(
       z.object({ name: z.string(), mimeType: z.string(), data: z.string() }),
     ),
     questions: z
       .array(questionSchema)
-      .min(1, "Add at least one question")
-      .max(MAX_QUESTIONS, `At most ${MAX_QUESTIONS} questions`),
+      .min(1, FORM_ERRORS.questionsMin)
+      .max(MAX_QUESTIONS, FORM_ERRORS.questionsMax),
   })
   .superRefine((form, ctx) => {
     if (form.state.trim() === "" && form.images.length === 0) {
       ctx.addIssue({
         code: "custom",
         path: ["state"],
-        message: "Describe the state or attach an image",
+        message: FORM_ERRORS.stateRequired,
       });
     }
     // Question names become the keys of a JSON object, so they must be unique.
@@ -90,7 +94,7 @@ export const decisionFormSchema = z
         ctx.addIssue({
           code: "custom",
           path: ["questions", index, "name"],
-          message: "Name already used",
+          message: FORM_ERRORS.keyTaken,
         });
       }
       seen.add(name);

@@ -1,0 +1,124 @@
+{
+  "app": {
+    "title": "Рішення",
+    "subtitle": "Ставте decision-моделям Ollama типізовані запитання й дивіться ймовірності.",
+    "reloadModels": "Оновити моделі",
+    "loadingModels": "Завантаження моделей…",
+    "answers": "Відповіді",
+    "ollamaUnreachable": {
+      "title": "Не вдається з'єднатися з Ollama",
+      "description": "{{message}}. Запустіть Ollama або вкажіть OLLAMA_URL перед запуском dev-сервера."
+    },
+    "noModels": {
+      "title": "Немає встановлених decision-моделей",
+      "description": "Завантажте одну, наприклад <code>ollama pull d3</code>, і оновіть моделі."
+    }
+  },
+  "presets": {
+    "supportTicket": "Сортування звернень у підтримку",
+    "modelRouter": "Маршрутизатор моделей",
+    "blank": "Порожній"
+  },
+  "form": {
+    "preset": "Пресет",
+    "presetHint": "Замінює стан і запитання.",
+    "model": "Модель",
+    "noModels": "Немає decision-моделей",
+    "vision": "зображення",
+    "state": "Стан",
+    "statePlaceholder": "Що має оцінити модель: текст або JSON-об'єкт / масив.",
+    "stateHint": "Коректні JSON-об'єкти й масиви надсилаються як структурований стан.",
+    "images": "Зображення",
+    "addImages": "Додати зображення",
+    "removeImage": "Видалити {{name}}",
+    "imagesHint": "PNG, JPEG або WebP, спільні для всіх запитань.",
+    "imagesUnsupported": "Ця модель не приймає зображень.",
+    "questions": "Запитання",
+    "addQuestion": "Додати запитання",
+    "decide": "Вирішити",
+    "cancel": "Скасувати"
+  },
+  "question": {
+    "key": "Ключ",
+    "type": "Тип",
+    "remove": "Видалити запитання",
+    "text": "Запитання",
+    "textPlaceholder": "Чи термінове це звернення?",
+    "trueMeans": "«Так» означає (необов'язково)",
+    "truePlaceholder": "Потрібна відповідь протягом години",
+    "falseMeans": "«Ні» означає (необов'язково)",
+    "falsePlaceholder": "Може зачекати у звичайній черзі",
+    "types": {
+      "noul": "Так / ні",
+      "choice": "Вибір",
+      "score": "Оцінка"
+    },
+    "hints": {
+      "noul": "Повертає ймовірність того, що відповідь — «так».",
+      "choice": "Обирає один варіант і повертає ймовірність кожного.",
+      "score": "Оцінює за вашою шкалою й повертає рівень, зважений за ймовірністю."
+    },
+    "options": {
+      "option": "Варіант",
+      "description": "Опис (необов'язково)",
+      "descriptionPlaceholder": "Збої, помилки та налаштування",
+      "nameLabel": "Назва варіанта {{n}}",
+      "descriptionLabel": "Опис варіанта {{n}}",
+      "remove": "Видалити варіант {{n}}",
+      "add": "Додати варіант"
+    },
+    "levels": {
+      "hint": "Рівні, від найнижчого",
+      "lowPlaceholder": "Без впливу",
+      "highPlaceholder": "Критичний",
+      "label": "Опис рівня {{n}}",
+      "remove": "Видалити рівень {{n}}",
+      "add": "Додати рівень"
+    }
+  },
+  "errors": {
+    "required": "Обов'язкове поле",
+    "keyFormat": "Лише літери, цифри, _ та -",
+    "keyTaken": "Цей ключ уже використано",
+    "optionCount": "Потрібно {{minOptions}}–{{maxOptions}} варіантів",
+    "levelCount": "Потрібно {{minOptions}}–{{maxOptions}} рівнів",
+    "duplicateOption": "Такий варіант уже є",
+    "modelRequired": "Оберіть decision-модель",
+    "questionsMin": "Додайте хоча б одне запитання",
+    "questionsMax": "Не більше {{maxQuestions}} запитань",
+    "stateRequired": "Опишіть стан або додайте зображення"
+  },
+  "results": {
+    "idle": "Заповніть стан і запитання, потім натисніть <b>Вирішити</b>.",
+    "loading": "Вирішуємо… перший запит також завантажує модель.",
+    "failed": "Запит не вдався",
+    "pullHint": "Виконайте: ollama pull {{model}}",
+    "elapsed": "{{ms}} мс",
+    "tokens_one": "{{count}} токен",
+    "tokens_few": "{{count}} токени",
+    "tokens_many": "{{count}} токенів",
+    "tokens_other": "{{count}} токена",
+    "tokensInOut": "{{input}} на вході / {{output}} на виході",
+    "request": "Запит",
+    "response": "Відповідь"
+  },
+  "answer": {
+    "yes": "Так",
+    "no": "Ні",
+    "pYes": "P(так)",
+    "pYesLabel": "Ймовірність «так»",
+    "confidence": "впевн. {{value}}",
+    "confidenceHint": "Наскільки зосереджені ймовірності",
+    "chartLabelChoice": "{{name}}: ймовірність кожного варіанта",
+    "chartLabelScore": "{{name}}: ймовірність кожного рівня"
+  },
+  "theme": {
+    "label": "Тема",
+    "light": "Світла",
+    "dark": "Темна",
+    "system": "Системна"
+  },
+  "language": {
+    "label": "Мова"
+  }
+}

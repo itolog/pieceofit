@@ -27,6 +27,11 @@ the root as the finish line) are in [the root CLAUDE.md](../../CLAUDE.md).
   the resolved theme, not from CSS variables: Nivo writes SVG `fill` attributes, where
   `var()` does not resolve. The accent was validated for contrast against both card
   surfaces; re-check it if the shadcn theme's card colour changes.
+- **Every UI string goes through i18next** (`src/locales/{en,uk}.json`). `t()` is typed
+  against `en.json` (`types/i18next.type.ts`, a module augmentation nothing imports, so
+  knip ignores it), and a unit test holds `uk.json` to the same keys. Validation messages
+  in the zod schema are keys from `FORM_ERRORS`, translated by `FormFieldError`; numbers
+  go through `formatPercent` / `formatDecimal` with `i18n.language`.
 - **Models are filtered by the `decision` capability** from `/api/tags`; `vision`
   enables image upload. Do not hard-code model names.
 

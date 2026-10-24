@@ -1,8 +1,9 @@
 import { Plus, X } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
+import { FormFieldError } from "@/components/form-field-error";
 import { Button } from "@/components/ui/button";
-import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MAX_OPTIONS, MIN_OPTIONS } from "@/models/decision.model";
 import { DecisionFormValues } from "@/types/decision-form.type";
@@ -14,6 +15,7 @@ import { ChoiceOptionsFieldProps } from "./choice-options-field.type";
 export const ChoiceOptionsField = ({
   questionIndex,
 }: ChoiceOptionsFieldProps) => {
+  const { t } = useTranslation();
   const { control, register, formState } = useFormContext<DecisionFormValues>();
   const { fields, append, remove } = useFieldArray({
     control,
@@ -24,15 +26,15 @@ export const ChoiceOptionsField = ({
   return (
     <div className="flex flex-col gap-2">
       <div className="text-muted-foreground grid grid-cols-[minmax(0,12rem)_1fr_2rem] gap-2 text-xs">
-        <span>Option</span>
-        <span>Description (optional)</span>
+        <span>{t("question.options.option")}</span>
+        <span>{t("question.options.description")}</span>
       </div>
       {fields.map((field, index) => (
         <div key={field.id} className="flex flex-col gap-1">
           <div className="grid grid-cols-[minmax(0,12rem)_1fr_2rem] gap-2">
             <Input
               {...register(`questions.${questionIndex}.options.${index}.name`)}
-              aria-label={`Option ${index + 1} name`}
+              aria-label={t("question.options.nameLabel", { n: index + 1 })}
               aria-invalid={Boolean(errors?.[index]?.name)}
               placeholder="technical"
               className="font-mono"
@@ -41,23 +43,25 @@ export const ChoiceOptionsField = ({
               {...register(
                 `questions.${questionIndex}.options.${index}.description`,
               )}
-              aria-label={`Option ${index + 1} description`}
-              placeholder="Outages, errors, and configuration"
+              aria-label={t("question.options.descriptionLabel", {
+                n: index + 1,
+              })}
+              placeholder={t("question.options.descriptionPlaceholder")}
             />
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              aria-label={`Remove option ${index + 1}`}
+              aria-label={t("question.options.remove", { n: index + 1 })}
               disabled={fields.length <= MIN_OPTIONS}
               onClick={() => remove(index)}>
               <X />
             </Button>
           </div>
-          <FieldError errors={[errors?.[index]?.name]} />
+          <FormFieldError error={errors?.[index]?.name} />
         </div>
       ))}
-      <FieldError errors={[errors?.root]} />
+      <FormFieldError error={errors?.root} />
       <Button
         type="button"
         variant="outline"
@@ -65,7 +69,7 @@ export const ChoiceOptionsField = ({
         className="self-start"
         disabled={fields.length >= MAX_OPTIONS}
         onClick={() => append({ name: "", description: "" })}>
-        <Plus /> Add option
+        <Plus /> {t("question.options.add")}
       </Button>
     </div>
   );
