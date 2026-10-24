@@ -49,24 +49,24 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.968 0.006 255);
+  --foreground: oklch(0.16 0.02 260);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.16 0.02 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.16 0.02 260);
+  --primary: #2a78d6;
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.94 0.012 255);
+  --secondary-foreground: oklch(0.25 0.03 260);
+  --muted: oklch(0.95 0.008 255);
+  --muted-foreground: oklch(0.47 0.02 260);
+  --accent: oklch(0.93 0.035 255);
+  --accent-foreground: oklch(0.32 0.1 258);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.87 0.012 255);
+  --input: oklch(0.84 0.014 255);
+  --ring: #2a78d6;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -81,27 +81,33 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Question types — validated with the dataviz palette checker against the
+     blue accent (all pairs). Always paired with a text label: the light aqua
+     and amber sit below 3:1 on white, and two pairs are in the CVD warn band. */
+  --type-noul: #1baf7a;
+  --type-choice: #eda100;
+  --type-score: #e34948;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.13 0.012 260);
+  --foreground: oklch(0.97 0.004 255);
+  --card: oklch(0.195 0.014 260);
+  --card-foreground: oklch(0.97 0.004 255);
+  --popover: oklch(0.22 0.014 260);
+  --popover-foreground: oklch(0.97 0.004 255);
+  --primary: #2a78d6;
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.27 0.014 260);
+  --secondary-foreground: oklch(0.97 0.004 255);
+  --muted: oklch(0.25 0.012 260);
+  --muted-foreground: oklch(0.74 0.015 255);
+  --accent: oklch(0.3 0.05 258);
+  --accent-foreground: oklch(0.97 0.004 255);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: oklch(1 0 0 / 13%);
+  --input: oklch(1 0 0 / 17%);
+  --ring: #3987e5;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -115,6 +121,9 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --type-noul: #199e70;
+  --type-choice: #c98500;
+  --type-score: #e34948;
 }
 
 @layer base {
@@ -126,5 +135,65 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@theme inline {
+  --color-type-noul: var(--type-noul);
+  --color-type-choice: var(--type-choice);
+  --color-type-score: var(--type-score);
+}
+
+/* Loading visuals (ThinkingIndicator, AnswerSkeleton). Users who ask for
+   less motion get the static frame. */
+@theme {
+  --animate-shimmer: shimmer 2.4s linear infinite;
+
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+}
+
+@layer components {
+  /* A highlight sweeping through text in the accent and type colours. */
+  .text-shimmer {
+    background-image: linear-gradient(
+      90deg,
+      var(--muted-foreground) 0%,
+      var(--foreground) 20%,
+      var(--primary) 35%,
+      var(--type-noul) 50%,
+      var(--type-choice) 65%,
+      var(--foreground) 80%,
+      var(--muted-foreground) 100%
+    );
+    background-size: 200% 100%;
+    background-clip: text;
+    color: transparent;
+    animation: var(--animate-shimmer);
+  }
+
+  /* A placeholder bar with a soft light passing over it. */
+  .skeleton-shimmer {
+    background-image: linear-gradient(
+      90deg,
+      var(--muted) 0%,
+      var(--accent) 50%,
+      var(--muted) 100%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .text-shimmer,
+    .skeleton-shimmer {
+      animation: none;
+    }
   }
 }

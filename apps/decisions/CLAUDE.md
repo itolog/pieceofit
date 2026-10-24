@@ -27,6 +27,11 @@ the root as the finish line) are in [the root CLAUDE.md](../../CLAUDE.md).
   the resolved theme, not from CSS variables: Nivo writes SVG `fill` attributes, where
   `var()` does not resolve. The accent was validated for contrast against both card
   surfaces; re-check it if the shadcn theme's card colour changes.
+- **Colour carries meaning, never alone.** The blue accent (`--primary`) marks actions
+  and the model's pick; each question type has an identity colour (`--type-*` in
+  `index.css`, mapped in `QUESTION_TYPE_STYLES`) that always comes with its name
+  (`TypeBadge`) or a visible type select. The set was checked with the dataviz palette
+  validator, all pairs, in both themes — re-run it before adding or changing a colour.
 - **Every UI string goes through i18next** (`src/locales/{en,uk}.json`). `t()` is typed
   against `en.json` (`types/i18next.type.ts`, a module augmentation nothing imports, so
   knip ignores it), and a unit test holds `uk.json` to the same keys. Validation messages

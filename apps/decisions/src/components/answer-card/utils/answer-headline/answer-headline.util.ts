@@ -3,6 +3,7 @@ import { match } from "ts-pattern";
 import { Answer } from "@/services/ollama";
 import { formatDecimal } from "@/utils/format-decimal";
 
+import { YES_THRESHOLD } from "../../answer-card.model";
 import { AnswerLabels } from "../../answer-card.type";
 
 // The one-line result shown above the bars: the verdict, the chosen option,
@@ -12,7 +13,7 @@ export const answerHeadline = (
   { yes, no, locale }: AnswerLabels,
 ): string => {
   return match(answer)
-    .with({ type: "noul" }, ({ noul }) => (noul >= 0.5 ? yes : no))
+    .with({ type: "noul" }, ({ noul }) => (noul >= YES_THRESHOLD ? yes : no))
     .with({ type: "choice" }, ({ choice }) => choice)
     .with({ type: "score" }, ({ score, legend }) => {
       const topLevel = Object.keys(legend).length - 1;

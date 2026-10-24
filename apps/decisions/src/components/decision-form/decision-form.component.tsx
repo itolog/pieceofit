@@ -13,7 +13,9 @@ import { useTranslation } from "react-i18next";
 
 import { FormFieldError } from "@/components/form-field-error";
 import { QuestionCard } from "@/components/question-card";
+import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import {
   Select,
@@ -100,126 +102,134 @@ export const DecisionForm = ({
         className="flex flex-col gap-6"
         noValidate
         onSubmit={(event) => void submit(event)}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="preset">{t("form.preset")}</FieldLabel>
-            <Select defaultValue={DEFAULT_PRESET.id} onValueChange={loadPreset}>
-              <SelectTrigger id="preset" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PRESETS.map((preset) => (
-                  <SelectItem key={preset.id} value={preset.id}>
-                    {t(preset.labelKey)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FieldDescription>{t("form.presetHint")}</FieldDescription>
-          </Field>
-          <Controller
-            control={control}
-            name="model"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="model">{t("form.model")}</FieldLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger
-                    id="model"
-                    className="w-full font-mono"
-                    aria-invalid={fieldState.invalid}>
-                    <SelectValue placeholder={t("form.noModels")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {models.map((model) => (
-                      <SelectItem
-                        key={model.name}
-                        value={model.name}
-                        className="font-mono">
-                        {model.name}
-                        {model.vision && (
-                          <span className="text-muted-foreground font-sans text-xs">
-                            {t("form.vision")}
-                          </span>
-                        )}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormFieldError error={fieldState.error} />
-              </Field>
-            )}
-          />
-        </div>
-
-        <Field data-invalid={Boolean(formState.errors.state)}>
-          <FieldLabel htmlFor="state">{t("form.state")}</FieldLabel>
-          <Textarea
-            {...register("state")}
-            id="state"
-            rows={5}
-            aria-invalid={Boolean(formState.errors.state)}
-            placeholder={t("form.statePlaceholder")}
-            className="font-mono text-sm"
-          />
-          <FieldDescription>{t("form.stateHint")}</FieldDescription>
-          <FormFieldError error={formState.errors.state} />
-        </Field>
-
-        <Field>
-          <FieldLabel>{t("form.images")}</FieldLabel>
-          <div className="flex flex-wrap items-center gap-2">
-            {images.fields.map((image, index) => (
-              <div
-                key={image.id}
-                className="group relative size-20 overflow-hidden rounded-md border">
-                <img
-                  src={`data:${image.mimeType};base64,${image.data}`}
-                  alt={image.name}
-                  className="size-full object-cover"
+        <section className="flex flex-col gap-3">
+          <SectionHeading step={1} title={t("form.input")} />
+          <Card>
+            <CardContent className="flex flex-col gap-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="preset">{t("form.preset")}</FieldLabel>
+                  <Select
+                    defaultValue={DEFAULT_PRESET.id}
+                    onValueChange={loadPreset}>
+                    <SelectTrigger id="preset" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRESETS.map((preset) => (
+                        <SelectItem key={preset.id} value={preset.id}>
+                          {t(preset.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>{t("form.presetHint")}</FieldDescription>
+                </Field>
+                <Controller
+                  control={control}
+                  name="model"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="model">{t("form.model")}</FieldLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}>
+                        <SelectTrigger
+                          id="model"
+                          className="w-full font-mono"
+                          aria-invalid={fieldState.invalid}>
+                          <SelectValue placeholder={t("form.noModels")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {models.map((model) => (
+                            <SelectItem
+                              key={model.name}
+                              value={model.name}
+                              className="font-mono">
+                              {model.name}
+                              {model.vision && (
+                                <span className="text-muted-foreground font-sans text-xs">
+                                  {t("form.vision")}
+                                </span>
+                              )}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormFieldError error={fieldState.error} />
+                    </Field>
+                  )}
                 />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon-xs"
-                  className="absolute top-1 right-1"
-                  aria-label={t("form.removeImage", { name: image.name })}
-                  onClick={() => images.remove(index)}>
-                  <X />
-                </Button>
               </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!selectedModel?.vision}
-              onClick={() => fileInputRef.current?.click()}>
-              <ImagePlus /> {t("form.addImages")}
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={ACCEPTED_IMAGE_TYPES.join(",")}
-              multiple
-              hidden
-              onChange={(event) => void addImages(event.target.files)}
-            />
-          </div>
-          <FieldDescription>
-            {selectedModel?.vision
-              ? t("form.imagesHint")
-              : t("form.imagesUnsupported")}
-          </FieldDescription>
-        </Field>
+
+              <Field data-invalid={Boolean(formState.errors.state)}>
+                <FieldLabel htmlFor="state">{t("form.state")}</FieldLabel>
+                <Textarea
+                  {...register("state")}
+                  id="state"
+                  rows={5}
+                  aria-invalid={Boolean(formState.errors.state)}
+                  placeholder={t("form.statePlaceholder")}
+                  className="font-mono text-sm"
+                />
+                <FieldDescription>{t("form.stateHint")}</FieldDescription>
+                <FormFieldError error={formState.errors.state} />
+              </Field>
+
+              <Field>
+                <FieldLabel>{t("form.images")}</FieldLabel>
+                <div className="flex flex-wrap items-center gap-2">
+                  {images.fields.map((image, index) => (
+                    <div
+                      key={image.id}
+                      className="group relative size-20 overflow-hidden rounded-md border">
+                      <img
+                        src={`data:${image.mimeType};base64,${image.data}`}
+                        alt={image.name}
+                        className="size-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon-xs"
+                        className="absolute top-1 right-1"
+                        aria-label={t("form.removeImage", { name: image.name })}
+                        onClick={() => images.remove(index)}>
+                        <X />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!selectedModel?.vision}
+                    onClick={() => fileInputRef.current?.click()}>
+                    <ImagePlus /> {t("form.addImages")}
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                    multiple
+                    hidden
+                    onChange={(event) => void addImages(event.target.files)}
+                  />
+                </div>
+                <FieldDescription>
+                  {selectedModel?.vision
+                    ? t("form.imagesHint")
+                    : t("form.imagesUnsupported")}
+                </FieldDescription>
+              </Field>
+            </CardContent>
+          </Card>
+        </section>
 
         <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 className="font-heading text-base font-medium">
-              {t("form.questions")}{" "}
-              <span className="text-muted-foreground font-normal">
-                {questions.fields.length}/{MAX_QUESTIONS}
-              </span>
-            </h2>
+          <SectionHeading step={2} title={t("form.questions")}>
+            <span className="text-muted-foreground text-sm tabular-nums">
+              {questions.fields.length}/{MAX_QUESTIONS}
+            </span>
             <Button
               type="button"
               variant="outline"
@@ -235,7 +245,7 @@ export const DecisionForm = ({
               }>
               <Plus /> {t("form.addQuestion")}
             </Button>
-          </div>
+          </SectionHeading>
           {questions.fields.map((question, index) => (
             <QuestionCard
               key={question.id}
@@ -248,7 +258,11 @@ export const DecisionForm = ({
         </section>
 
         <div className="bg-background/80 sticky bottom-0 flex items-center gap-2 border-t py-3 backdrop-blur">
-          <Button type="submit" disabled={busy || models.length === 0}>
+          <Button
+            type="submit"
+            size="lg"
+            className="px-6"
+            disabled={busy || models.length === 0}>
             {busy && <Loader2 className="animate-spin" />}
             {t("form.decide")}
           </Button>

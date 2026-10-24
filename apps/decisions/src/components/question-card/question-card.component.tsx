@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { QUESTION_TYPES } from "@/models/decision.model";
+import { QUESTION_TYPE_STYLES } from "@/models/question-type.model";
 import { DecisionFormValues } from "@/types/decision-form.type";
 
 import { QuestionCardProps } from "./question-card.type";
@@ -36,7 +37,9 @@ export const QuestionCard = ({
   const errors = formState.errors.questions?.[index];
 
   return (
-    <Card size="sm">
+    <Card
+      size="sm"
+      className={`border-l-4 transition-colors ${QUESTION_TYPE_STYLES[type].edge}`}>
       <CardHeader className="flex flex-row items-start gap-2">
         <Field data-invalid={Boolean(errors?.name)} className="flex-1">
           <FieldLabel htmlFor={questionFieldId(index, "name")}>

@@ -2,7 +2,7 @@ import { ResolvedTheme } from "@/services/theme";
 
 // Emphasis form: the model's pick in the accent hue, the rest in a recessive
 // gray. The accent clears 3:1 on both card surfaces (validated with the
-// dataviz palette checker: #fff light, #171717 dark). Text never wears the
+// dataviz palette checker: #fff light, #1b1d22 dark — the card surfaces). Text never wears the
 // data colour — labels use the ink tones.
 export const CHART_PALETTE: Record<
   ResolvedTheme,

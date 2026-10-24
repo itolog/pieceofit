@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { ProbabilityChart } from "@/components/probability-chart";
+import { TypeBadge } from "@/components/type-badge";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { QUESTION_TYPE_STYLES } from "@/models/question-type.model";
 import { formatDecimal } from "@/utils/format-decimal";
 import { formatPercent } from "@/utils/format-percent";
 
@@ -26,12 +28,14 @@ export const AnswerCard = ({ name, answer, instructions }: AnswerCardProps) => {
   const labels = { yes: t("answer.yes"), no: t("answer.no"), locale };
 
   return (
-    <Card size="sm">
+    <Card
+      size="sm"
+      className={`border-l-4 ${QUESTION_TYPE_STYLES[answer.type].edge}`}>
       <CardHeader>
         <CardTitle className="font-mono">{name}</CardTitle>
         {instructions && <CardDescription>{instructions}</CardDescription>}
         <CardAction className="flex gap-1">
-          <Badge variant="secondary">{answer.type}</Badge>
+          <TypeBadge type={answer.type} />
           {answer.type !== "noul" && (
             <Badge variant="outline" title={t("answer.confidenceHint")}>
               {t("answer.confidence", {
@@ -42,7 +46,7 @@ export const AnswerCard = ({ name, answer, instructions }: AnswerCardProps) => {
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <p className="font-heading text-2xl font-semibold">
+        <p className="font-heading text-3xl font-bold tracking-tight">
           {answerHeadline(answer, labels)}
         </p>
         {answer.type === "noul" ? (

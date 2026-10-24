@@ -1,9 +1,11 @@
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, ChartBar } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { AnswerCard } from "@/components/answer-card";
+import { AnswerSkeleton } from "@/components/answer-skeleton";
 import { RawJson } from "@/components/raw-json";
 import { RequestStats } from "@/components/request-stats";
+import { ThinkingIndicator } from "@/components/thinking-indicator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { ResultsPanelProps } from "./results-panel.type";
@@ -16,8 +18,13 @@ export const ResultsPanel = ({ status }: ResultsPanelProps) => {
 
   if (status.kind === "idle") {
     return (
-      <div className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
-        <Trans i18nKey="results.idle" components={{ b: <b /> }} />
+      <div className="text-muted-foreground bg-card/60 flex flex-col items-center gap-3 rounded-xl border-2 border-dashed p-8 text-center text-sm">
+        <span className="bg-accent text-accent-foreground grid size-10 place-items-center rounded-full">
+          <ChartBar className="size-5" />
+        </span>
+        <p>
+          <Trans i18nKey="results.idle" components={{ b: <b /> }} />
+        </p>
       </div>
     );
   }
@@ -25,10 +32,12 @@ export const ResultsPanel = ({ status }: ResultsPanelProps) => {
   return (
     <div className="flex flex-col gap-3">
       {status.kind === "loading" && (
-        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-          <Loader2 className="size-4 animate-spin" />
-          {t("results.loading")}
-        </div>
+        <>
+          <ThinkingIndicator model={status.request.model} />
+          {Object.entries(status.request.questions).map(([name, question]) => (
+            <AnswerSkeleton key={name} name={name} question={question} />
+          ))}
+        </>
       )}
       {status.kind === "error" && (
         <Alert variant="destructive">

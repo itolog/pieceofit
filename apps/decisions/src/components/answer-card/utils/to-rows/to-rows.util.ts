@@ -3,6 +3,7 @@ import { match } from "ts-pattern";
 import { Answer } from "@/services/ollama";
 import { AnswerRow } from "@/types/answer-row.type";
 
+import { YES_THRESHOLD } from "../../answer-card.model";
 import { AnswerLabels } from "../../answer-card.type";
 import { argmax } from "../argmax";
 
@@ -15,8 +16,8 @@ export const toRows = (
   return match(answer)
     .returnType<AnswerRow[]>()
     .with({ type: "noul" }, ({ noul }) => [
-      { label: yes, probability: noul, picked: noul >= 0.5 },
-      { label: no, probability: 1 - noul, picked: noul < 0.5 },
+      { label: yes, probability: noul, picked: noul >= YES_THRESHOLD },
+      { label: no, probability: 1 - noul, picked: noul < YES_THRESHOLD },
     ])
     .with({ type: "choice" }, ({ choice, probabilities }) =>
       Object.entries(probabilities).map(([label, probability]) => ({

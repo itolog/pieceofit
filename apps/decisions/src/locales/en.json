@@ -20,6 +20,7 @@
     "blank": "Blank"
   },
   "form": {
+    "input": "Input",
     "preset": "Preset",
     "presetHint": "Replaces the state and questions.",
     "model": "Model",
@@ -90,7 +91,6 @@
   },
   "results": {
     "idle": "Fill in the state and questions, then press <b>Decide</b>.",
-    "loading": "Deciding… the first request also loads the model.",
     "failed": "Request failed",
     "pullHint": "Run: ollama pull {{model}}",
     "elapsed": "{{ms}} ms",
@@ -118,5 +118,17 @@
   },
   "language": {
     "label": "Language"
+  },
+  "loading": {
+    "verbs": {
+      "reading": "Reading the state",
+      "weighing": "Weighing the options",
+      "comparing": "Comparing criteria",
+      "calibrating": "Calibrating probabilities",
+      "consulting": "Consulting the model",
+      "settling": "Settling on an answer"
+    },
+    "elapsed": "{{seconds}} s",
+    "hint": "Asking {{model}} — the first request also loads the model."
   }
 }

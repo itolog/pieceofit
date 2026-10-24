@@ -1,9 +1,10 @@
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Scale } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { DecisionForm } from "@/components/decision-form";
 import { LanguageToggle } from "@/components/language-toggle";
 import { ResultsPanel } from "@/components/results-panel";
+import { SectionHeading } from "@/components/section-heading";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -20,11 +21,16 @@ export const App = () => {
   return (
     <div className="mx-auto flex min-h-svh max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="font-heading text-xl font-semibold">
-            {t("app.title")}
-          </h1>
-          <p className="text-muted-foreground text-sm">{t("app.subtitle")}</p>
+        <div className="flex items-center gap-3">
+          <div className="bg-primary text-primary-foreground grid size-10 shrink-0 place-items-center rounded-xl shadow-sm">
+            <Scale className="size-5" />
+          </div>
+          <div>
+            <h1 className="font-heading text-2xl font-bold tracking-tight">
+              {t("app.title")}
+            </h1>
+            <p className="text-muted-foreground text-sm">{t("app.subtitle")}</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={reload}>
@@ -73,9 +79,7 @@ export const App = () => {
           />
         )}
         <aside className="flex flex-col gap-3 lg:sticky lg:top-6">
-          <h2 className="font-heading text-base font-medium">
-            {t("app.answers")}
-          </h2>
+          <SectionHeading step={3} title={t("app.answers")} />
           <ResultsPanel status={status} />
         </aside>
       </main>
