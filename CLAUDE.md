@@ -9,9 +9,15 @@ A Bun + Turborepo monorepo. `apps/*` holds runnable apps, `packages/*` the share
 extend (`typescript-config`, `oxlint-config`, `oxfmt-config`). Each app/package has its own
 `CLAUDE.md` where it has anything to add — read it before working inside one.
 
-One app today: **`apps/llm-translator`** — an Ink (React-for-CLI) + LangChain + Ollama terminal
-translator. Its invariants are in [its `CLAUDE.md`](apps/llm-translator/CLAUDE.md) and the _why_
-behind them in [`docs/decisions.md`](apps/llm-translator/docs/decisions.md).
+Apps:
+
+- **`apps/llm-translator`** — an Ink (React-for-CLI) + LangChain + Ollama terminal translator.
+  Its invariants are in [its `CLAUDE.md`](apps/llm-translator/CLAUDE.md) and the _why_ behind
+  them in [`docs/decisions.md`](apps/llm-translator/docs/decisions.md).
+- **`apps/decisions`** — a Vite + React (shadcn/ui, zod, react-hook-form, Nivo) page for Ollama
+  decision models (`d3`, `tev1`): build questions in a form, send them to `POST /v1/systemone`
+  through the dev server's `/ollama` proxy, see the probabilities. Invariants in
+  [its `CLAUDE.md`](apps/decisions/CLAUDE.md).
 
 The `packages/*` configs are consumed as **package specifiers with subpath exports**, never as
 paths into `node_modules`: `@pieceofit/oxlint-config` / `…/react`, `@pieceofit/oxfmt-config` /

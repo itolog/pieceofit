@@ -6,6 +6,12 @@
       "ignoreExportsUsedInFile": {
         "type": true
       }
+    },
+    "apps/decisions": {
+      "ignore": ["src/components/ui/**", "src/lib/**"],
+      "ignoreExportsUsedInFile": {
+        "type": true
+      }
     }
   }
 }

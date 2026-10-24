@@ -55,6 +55,24 @@ import { Message } from "@/types/message"; // ❌ folder + barrel around a type 
 import { Message } from "@/types/message.type"; // ✅ flat, full path
 ```
 
+The converse holds too: **constants live only in `*.model.ts`, types only in
+`*.type.ts`** — never declared in a component, hook, service or util file, even
+when private to it. A named value (a timeout, a URL prefix, a limit, a chunk size)
+goes to the owning module's `*.model.ts`; a type alias, including one derived from
+another type or inferred from a schema, goes to its `*.type.ts`. A util folder gets
+its own `*.model.ts` / `*.type.ts` when it needs one.
+
+```ts
+// ❌ in ollama.service.ts
+const DECIDE_TIMEOUT_MS = 120_000;
+
+// ✅ ollama.model.ts, imported by the service
+export const DECIDE_TIMEOUT_MS = 120_000;
+```
+
+Re-exporting a type from a barrel (`export type { … } from "./x.type"`) is the
+module's public API, not a declaration, and is fine.
+
 Most of them never leave their owning module (`*.type.ts` / `*.model.ts` next to
 the implementation). One goes to a shared top-level folder for its role only once
 **2+** modules need it, keeping its suffix — where that folder is, is the
@@ -62,8 +80,27 @@ project's call.
 
 ## Where a helper goes
 
+A helper is any function that is not the file's own unit: a formatter, a mapper, a
+parser, a guard, an error describer. **Helpers live only in `utils/`** — never declared
+in a `*.component.tsx`, `*.hook.ts`, `*.service.ts` or `*.model.ts`, however small:
+
+```ts
+// ❌ a one-liner in a component file
+const percent = (p: number) => `${(p * 100).toFixed(1)}%`;
+
+// ✅ its own util, imported where needed
+import { formatPercent } from "@/utils/format-percent";
+```
+
 - Used by **one** module → that module's own `utils/<helper>/` folder, imported relatively.
 - Used by **2+** modules → the shared top-level `utils/`, imported via the project's alias.
+- **One exported function per util folder.** A util does not keep private helper
+  functions either: a step another util needs is a sibling util (`../to-question`).
+- A util depends only on its arguments (and imports); a function that needs
+  component or hook state — an event handler calling `reset()` or a field array's
+  `append()` — is not a helper and stays inside the component.
+- A sub-component is a component, not a helper: it gets its own module folder too,
+  not a second `const Foo = () => …` in someone else's `*.component.tsx`.
 
 Keeping single-use helpers module-local also avoids import cycles when the helper needs
 the module's own types.

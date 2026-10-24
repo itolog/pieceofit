@@ -1,0 +1,21 @@
+{
+  "state": "Write a haiku about autumn rain.",
+  "questions": {
+    "route": {
+      "type": "choice",
+      "instructions": "Which model should answer this prompt?",
+      "criteria": {
+        "small": "Short, simple or creative requests",
+        "large": "Multi-step reasoning, code or long documents"
+      }
+    },
+    "needs_tools": {
+      "type": "noul",
+      "instructions": "Does answering require web search or tools?",
+      "criteria": {
+        "true": "Needs fresh or external data",
+        "false": "Answerable from general knowledge"
+      }
+    }
+  }
+}
