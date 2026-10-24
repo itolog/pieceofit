@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 
+import { Duration } from "@/components/duration";
 import { ScannerBar } from "@/components/scanner-bar";
 import { useElapsed } from "@/hooks/use-elapsed";
 import { useTick } from "@/hooks/use-tick";
 import { bounceIndex } from "@/utils/bounce-index";
-import { formatDecimal } from "@/utils/format-decimal";
 
 import {
   SPINNER_FRAMES,
@@ -18,11 +18,11 @@ import { ThinkingIndicatorProps } from "./thinking-indicator.type";
 // colour sweep, a live timer and a scanner bar. Screen readers get one
 // polite status line, not every animation frame.
 export const ThinkingIndicator = ({ model }: ThinkingIndicatorProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const frame = bounceIndex(useTick(SPINNER_STEP_MS), SPINNER_FRAMES.length);
   const verb =
     VERB_KEYS[useTick(VERB_STEP_MS) % VERB_KEYS.length] ?? VERB_KEYS[0];
-  const seconds = formatDecimal(useElapsed() / 1000, 1, i18n.language);
+  const elapsed = useElapsed();
 
   return (
     <div className="bg-card ring-foreground/10 flex flex-col gap-3 rounded-xl p-4 shadow-sm ring-1">
@@ -34,7 +34,7 @@ export const ThinkingIndicator = ({ model }: ThinkingIndicatorProps) => {
         </span>
         <span className="text-shimmer font-medium">{t(verb)}…</span>
         <span className="text-muted-foreground ml-auto font-mono text-xs tabular-nums">
-          {t("loading.elapsed", { seconds })}
+          <Duration ms={elapsed} />
         </span>
       </output>
       <ScannerBar />

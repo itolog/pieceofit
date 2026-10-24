@@ -1,0 +1,34 @@
+{
+  "state": "From: security@paypa1-support.com\nSubject: Your account has been limited\n\nWe noticed unusual activity on your account. Verify your identity within 24 hours or your account will be permanently suspended: http://paypa1-verify.co/login",
+  "questions": {
+    "phishing": {
+      "type": "noul",
+      "instructions": "Is this email a phishing attempt?"
+    },
+    "red_flag": {
+      "type": "choice",
+      "instructions": "What is the strongest warning sign?",
+      "criteria": {
+        "spoofed_sender": "A sender domain imitating a known brand",
+        "urgency": "Pressure, deadlines or threats",
+        "suspicious_link": "A link to an unexpected domain",
+        "credentials": "Asks for passwords or payment details",
+        "none": "No warning signs"
+      }
+    },
+    "risk": {
+      "type": "score",
+      "instructions": "How risky is it to act on this email?",
+      "criteria": ["Safe", "Low", "Medium", "High", "Critical"]
+    },
+    "action": {
+      "type": "choice",
+      "instructions": "What should the mail filter do with it?",
+      "criteria": {
+        "deliver": "Deliver normally",
+        "warn": "Deliver with a warning banner",
+        "quarantine": "Move to quarantine"
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "state": {
+    "rating": 3,
+    "title": "Great sound, terrible app",
+    "text": "The headphones sound great and the battery easily lasts a week. But the companion app crashes every time I try to change the EQ, and support never answered my email."
+  },
+  "questions": {
+    "sentiment": {
+      "type": "score",
+      "instructions": "What is the overall sentiment of the review?",
+      "criteria": [
+        "Very negative",
+        "Negative",
+        "Mixed",
+        "Positive",
+        "Very positive"
+      ]
+    },
+    "main_issue": {
+      "type": "choice",
+      "instructions": "What is the reviewer's main complaint?",
+      "criteria": {
+        "none": "No real complaint",
+        "hardware": "Build quality, sound or battery",
+        "software": "App or firmware",
+        "support": "Customer service",
+        "delivery": "Shipping or packaging",
+        "price": "Value for money"
+      }
+    },
+    "recommends": {
+      "type": "noul",
+      "instructions": "Would the reviewer recommend the product to a friend?"
+    },
+    "follow_up": {
+      "type": "noul",
+      "instructions": "Should customer support reach out to this reviewer?",
+      "criteria": {
+        "true": "There is an unresolved problem the company can fix",
+        "false": "Nothing to act on"
+      }
+    }
+  }
+}

@@ -55,5 +55,14 @@ enabled for models with the `vision` capability and shared by all questions.
 
 ## Presets
 
+| Preset             | What it shows                                                                    |
+| ------------------ | -------------------------------------------------------------------------------- |
+| Support ticket     | Urgency, routing to a team, severity                                             |
+| Message tone       | Tone, sarcasm, blame, urgency, whether to rewrite before sending                 |
+| Comment moderation | Toxicity, category, self-promotion, usefulness, moderator action                 |
+| Product review     | Sentiment, main complaint, recommendation, support follow-up — with a JSON state |
+| Phishing check     | Phishing or not, strongest warning sign, risk, what the filter does              |
+| Model router       | Which model should answer a prompt                                               |
+
 `src/presets/*.json` are request bodies without `model`. List a new one in
 `src/presets/presets.model.ts` to show it in the picker.

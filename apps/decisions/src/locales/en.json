@@ -16,6 +16,10 @@
   },
   "presets": {
     "supportTicket": "Support ticket triage",
+    "messageTone": "Message tone",
+    "commentModeration": "Comment moderation",
+    "productReview": "Product review",
+    "phishingEmail": "Phishing check",
     "modelRouter": "Model router",
     "blank": "Blank"
   },
@@ -93,10 +97,6 @@
     "idle": "Fill in the state and questions, then press <b>Decide</b>.",
     "failed": "Request failed",
     "pullHint": "Run: ollama pull {{model}}",
-    "elapsed": "{{ms}} ms",
-    "tokens_one": "{{count}} token",
-    "tokens_other": "{{count}} tokens",
-    "tokensInOut": "{{input}} in / {{output}} out tokens",
     "request": "Request",
     "response": "Response"
   },
@@ -128,7 +128,14 @@
       "consulting": "Consulting the model",
       "settling": "Settling on an answer"
     },
-    "elapsed": "{{seconds}} s",
     "hint": "Asking {{model}} — the first request also loads the model."
+  },
+  "stats": {
+    "time": "Time",
+    "tokens": "Tokens",
+    "tokensRead": "input",
+    "tokensInOut": "{{input}} in · {{output}} out",
+    "questions": "Questions",
+    "model": "Model"
   }
 }

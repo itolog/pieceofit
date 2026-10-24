@@ -16,6 +16,10 @@
   },
   "presets": {
     "supportTicket": "Сортування звернень у підтримку",
+    "messageTone": "Тон повідомлення",
+    "commentModeration": "Модерація коментарів",
+    "productReview": "Відгук про товар",
+    "phishingEmail": "Перевірка на фішинг",
     "modelRouter": "Маршрутизатор моделей",
     "blank": "Порожній"
   },
@@ -93,12 +97,6 @@
     "idle": "Заповніть стан і запитання, потім натисніть <b>Вирішити</b>.",
     "failed": "Запит не вдався",
     "pullHint": "Виконайте: ollama pull {{model}}",
-    "elapsed": "{{ms}} мс",
-    "tokens_one": "{{count}} токен",
-    "tokens_few": "{{count}} токени",
-    "tokens_many": "{{count}} токенів",
-    "tokens_other": "{{count}} токена",
-    "tokensInOut": "{{input}} на вході / {{output}} на виході",
     "request": "Запит",
     "response": "Відповідь"
   },
@@ -130,7 +128,14 @@
       "consulting": "Радимося з моделлю",
       "settling": "Обираємо відповідь"
     },
-    "elapsed": "{{seconds}} с",
     "hint": "Питаємо {{model}} — перший запит також завантажує модель."
+  },
+  "stats": {
+    "time": "Час",
+    "tokens": "Токени",
+    "tokensRead": "на вході",
+    "tokensInOut": "{{input}} на вході · {{output}} на виході",
+    "questions": "Запитання",
+    "model": "Модель"
   }
 }

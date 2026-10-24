@@ -1,0 +1,40 @@
+{
+  "state": "Great breakdown, but you got the battery numbers wrong at 4:12 — it's 4500 mAh, not 5000. Also check out my channel for REAL reviews 🔥🔥 link in bio",
+  "questions": {
+    "toxic": {
+      "type": "noul",
+      "instructions": "Is the comment toxic: insults, harassment or hate?"
+    },
+    "category": {
+      "type": "choice",
+      "instructions": "What kind of comment is this, mainly?",
+      "criteria": {
+        "constructive": "Feedback or a correction that helps the author",
+        "question": "Asks the author or other viewers something",
+        "praise": "Positive, without much substance",
+        "spam": "Self-promotion, links, scams or ads",
+        "off_topic": "Unrelated to the content",
+        "abuse": "Insults, harassment or hate"
+      }
+    },
+    "self_promotion": {
+      "type": "noul",
+      "instructions": "Does the comment promote the commenter's own channel, product or link?"
+    },
+    "usefulness": {
+      "type": "score",
+      "instructions": "How useful is the comment to other readers?",
+      "criteria": ["Noise", "Low", "Some value", "Valuable"]
+    },
+    "action": {
+      "type": "choice",
+      "instructions": "What should the moderator do with it?",
+      "criteria": {
+        "approve": "Publish as it is",
+        "reply": "Publish and answer: it asks or corrects something",
+        "review": "Hold for a human: useful content mixed with spam or rudeness",
+        "hide": "Hide: spam or abuse with nothing of value"
+      }
+    }
+  }
+}

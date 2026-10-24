@@ -36,7 +36,9 @@ the root as the finish line) are in [the root CLAUDE.md](../../CLAUDE.md).
   against `en.json` (`types/i18next.type.ts`, a module augmentation nothing imports, so
   knip ignores it), and a unit test holds `uk.json` to the same keys. Validation messages
   in the zod schema are keys from `FORM_ERRORS`, translated by `FormFieldError`; numbers
-  go through `formatPercent` / `formatDecimal` with `i18n.language`.
+  go through `formatPercent` / `formatDecimal` with `i18n.language`; durations through
+  `Duration` (`Intl.DurationFormat`: units come from the engine, so tests check numbers, not
+  wording, which differs between Chrome and Bun).
 - **Models are filtered by the `decision` capability** from `/api/tags`; `vision`
   enables image upload. Do not hard-code model names.
 

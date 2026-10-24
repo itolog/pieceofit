@@ -1,0 +1,37 @@
+{
+  "state": "Hey, just following up AGAIN on the report I asked for last week. I guess some of us have more important things to do. Would be great to get it before Friday, if that's not too much trouble.",
+  "questions": {
+    "tone": {
+      "type": "choice",
+      "instructions": "What is the overall tone of the message?",
+      "criteria": {
+        "friendly": "Warm and positive",
+        "neutral": "Matter-of-fact, no emotional colouring",
+        "formal": "Polite and professional",
+        "passive_aggressive": "Polite on the surface, with hidden irritation or blame",
+        "hostile": "Openly angry, rude or threatening"
+      }
+    },
+    "sarcasm": {
+      "type": "noul",
+      "instructions": "Does the message use sarcasm or irony?"
+    },
+    "blame": {
+      "type": "noul",
+      "instructions": "Does the message blame the reader or try to make them feel guilty?"
+    },
+    "urgency": {
+      "type": "score",
+      "instructions": "How urgent does the sender make the request?",
+      "criteria": ["No deadline", "Low", "Medium", "High"]
+    },
+    "rewrite": {
+      "type": "noul",
+      "instructions": "Should the message be rewritten before sending?",
+      "criteria": {
+        "true": "The tone is likely to upset or put off the reader",
+        "false": "Fine to send as it is"
+      }
+    }
+  }
+}
