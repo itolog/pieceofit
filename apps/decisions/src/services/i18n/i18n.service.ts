@@ -9,12 +9,9 @@ import {
   MAX_QUESTIONS,
   MIN_OPTIONS,
 } from "@/models/decision.model";
+import { FALLBACK_LANGUAGE, LANGUAGES } from "@/models/language.model";
 
-import {
-  FALLBACK_LANGUAGE,
-  LANGUAGE_STORAGE_KEY,
-  LANGUAGES,
-} from "./i18n.model";
+import { LANGUAGE_STORAGE_KEY } from "./i18n.model";
 import { primarySubtag } from "./utils/primary-subtag";
 import { syncDocumentLanguage } from "./utils/sync-document-language";
 

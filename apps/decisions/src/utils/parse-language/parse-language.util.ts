@@ -1,5 +1,5 @@
-import { FALLBACK_LANGUAGE, LANGUAGES } from "../../i18n.model";
-import { Language } from "../../i18n.type";
+import { FALLBACK_LANGUAGE, LANGUAGES } from "@/models/language.model";
+import { Language } from "@/types/language.type";
 
 // Narrows a detected or selected language tag ("uk", "uk-UA", "de") to a
 // supported language, by its primary subtag; anything else falls back.

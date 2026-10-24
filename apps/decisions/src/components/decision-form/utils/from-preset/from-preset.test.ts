@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { LANGUAGES } from "@/models/language.model";
 import { PRESETS } from "@/presets/presets.model";
 import { decisionFormSchema } from "@/schemas/decision-form.schema";
 
@@ -72,12 +73,17 @@ describe("fromPreset", () => {
     ).toThrow();
   });
 
-  it("turns the shipped presets into valid forms, except the blank one", () => {
+  it("turns every shipped preset, in every language, into a valid form", () => {
     for (const preset of PRESETS) {
-      const result = decisionFormSchema.safeParse(
-        fromPreset(preset.body, "d3"),
-      );
-      expect(result.success, preset.id).toBe(preset.id !== "blank");
+      for (const language of LANGUAGES) {
+        const result = decisionFormSchema.safeParse(
+          fromPreset(preset.bodies[language], "d3"),
+        );
+        // The blank preset is valid only once the user fills it in.
+        expect(result.success, `${preset.id}/${language}`).toBe(
+          preset.id !== "blank",
+        );
+      }
     }
   });
 });

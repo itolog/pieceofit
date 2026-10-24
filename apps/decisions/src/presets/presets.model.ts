@@ -1,42 +1,62 @@
-import commentModeration from "./comment-moderation.json";
-import messageTone from "./message-tone.json";
-import modelRouter from "./model-router.json";
-import phishingEmail from "./phishing-email.json";
-import productReview from "./product-review.json";
-import supportTicket from "./support-ticket.json";
+import commentModerationEn from "./en/comment-moderation.json";
+import messageToneEn from "./en/message-tone.json";
+import modelRouterEn from "./en/model-router.json";
+import phishingEmailEn from "./en/phishing-email.json";
+import productReviewEn from "./en/product-review.json";
+import supportTicketEn from "./en/support-ticket.json";
+import commentModerationUk from "./uk/comment-moderation.json";
+import messageToneUk from "./uk/message-tone.json";
+import modelRouterUk from "./uk/model-router.json";
+import phishingEmailUk from "./uk/phishing-email.json";
+import productReviewUk from "./uk/product-review.json";
+import supportTicketUk from "./uk/support-ticket.json";
 
-// Starting points for the form. Each file is a /v1/systemone body without
-// `model`; adding one here is all it takes to list it in the picker.
+// Nothing to translate: one body serves every language.
+const BLANK_BODY = {
+  state: "",
+  questions: { question_1: { type: "noul", instructions: "" } },
+};
+
+// Starting points for the form, one body per interface language. A body is
+// a /v1/systemone request without `model`. Translations change the text
+// (state, instructions, descriptions, levels) but never the structure:
+// question keys, types and option names are identifiers the API returns,
+// and a unit test holds every language to the English shape.
 export const PRESETS = [
   {
     id: "support-ticket",
     labelKey: "presets.supportTicket",
-    body: supportTicket,
+    bodies: { en: supportTicketEn, uk: supportTicketUk },
   },
-  { id: "message-tone", labelKey: "presets.messageTone", body: messageTone },
+  {
+    id: "message-tone",
+    labelKey: "presets.messageTone",
+    bodies: { en: messageToneEn, uk: messageToneUk },
+  },
   {
     id: "comment-moderation",
     labelKey: "presets.commentModeration",
-    body: commentModeration,
+    bodies: { en: commentModerationEn, uk: commentModerationUk },
   },
   {
     id: "product-review",
     labelKey: "presets.productReview",
-    body: productReview,
+    bodies: { en: productReviewEn, uk: productReviewUk },
   },
   {
     id: "phishing-email",
     labelKey: "presets.phishingEmail",
-    body: phishingEmail,
+    bodies: { en: phishingEmailEn, uk: phishingEmailUk },
   },
-  { id: "model-router", labelKey: "presets.modelRouter", body: modelRouter },
+  {
+    id: "model-router",
+    labelKey: "presets.modelRouter",
+    bodies: { en: modelRouterEn, uk: modelRouterUk },
+  },
   {
     id: "blank",
     labelKey: "presets.blank",
-    body: {
-      state: "",
-      questions: { question_1: { type: "noul", instructions: "" } },
-    },
+    bodies: { en: BLANK_BODY, uk: BLANK_BODY },
   },
 ] as const;
 

@@ -39,6 +39,10 @@ the root as the finish line) are in [the root CLAUDE.md](../../CLAUDE.md).
   go through `formatPercent` / `formatDecimal` with `i18n.language`; durations through
   `Duration` (`Intl.DurationFormat`: units come from the engine, so tests check numbers, not
   wording, which differs between Chrome and Bun).
+- **Presets are translated, identifiers are not.** `PRESETS[i].bodies` has one body per
+  language (`src/presets/{en,uk}/`). Text changes per language; question keys, types,
+  option names and level counts do not — `presets.test.ts` compares every translation's
+  shape with English. Option names render in monospace to read as identifiers.
 - **Models are filtered by the `decision` capability** from `/api/tags`; `vision`
   enables image upload. Do not hard-code model names.
 

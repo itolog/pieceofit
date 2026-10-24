@@ -18,6 +18,7 @@
     "@nivo/theming": "0.99.0",
     "class-variance-authority": "0.7.1",
     "cn": "0.5.0",
+    "country-flag-icons": "1.6.20",
     "i18next": "26.5.10",
     "i18next-browser-languagedetector": "8.2.2",
     "lucide-react": "1.61.0",

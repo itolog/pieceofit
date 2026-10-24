@@ -29,6 +29,7 @@ import { MAX_QUESTIONS } from "@/models/decision.model";
 import { DEFAULT_PRESET, PRESETS } from "@/presets/presets.model";
 import { decisionFormSchema } from "@/schemas/decision-form.schema";
 import { DecisionFormValues } from "@/types/decision-form.type";
+import { parseLanguage } from "@/utils/parse-language";
 
 import { ACCEPTED_IMAGE_TYPES, EMPTY_QUESTION } from "./decision-form.model";
 import { DecisionFormProps } from "./decision-form.type";
@@ -44,11 +45,13 @@ export const DecisionForm = ({
   onSubmit,
   onCancel,
 }: DecisionFormProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = parseLanguage(i18n.language);
+  const [presetId, setPresetId] = useState<string>(DEFAULT_PRESET.id);
   // useForm reads defaultValues only on mount; the lazy initializer keeps the
   // preset from being re-parsed on every render.
   const [defaultValues] = useState(() =>
-    fromPreset(DEFAULT_PRESET.body, models[0]?.name ?? ""),
+    fromPreset(DEFAULT_PRESET.bodies[language], models[0]?.name ?? ""),
   );
   const form = useForm<DecisionFormValues>({
     resolver: zodResolver(decisionFormSchema),
@@ -72,8 +75,23 @@ export const DecisionForm = ({
 
   const loadPreset = (id: string) => {
     const preset = PRESETS.find((item) => item.id === id);
-    if (preset) reset(fromPreset(preset.body, getValues("model")));
+    if (!preset) return;
+    setPresetId(id);
+    reset(fromPreset(preset.bodies[language], getValues("model")));
   };
+
+  // Follow a language switch with the preset's translation — but only while
+  // the form is untouched, so it never throws away the user's edits.
+  const { isDirty } = formState;
+  const onLanguageChange = useEffectEvent(() => {
+    if (!isDirty) loadPreset(presetId);
+  });
+  const previousLanguage = useRef(language);
+  useEffect(() => {
+    if (previousLanguage.current === language) return;
+    previousLanguage.current = language;
+    onLanguageChange();
+  }, [language]);
 
   const addImages = async (files: FileList | null) => {
     if (!files) return;
@@ -109,9 +127,7 @@ export const DecisionForm = ({
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
                   <FieldLabel htmlFor="preset">{t("form.preset")}</FieldLabel>
-                  <Select
-                    defaultValue={DEFAULT_PRESET.id}
-                    onValueChange={loadPreset}>
+                  <Select value={presetId} onValueChange={loadPreset}>
                     <SelectTrigger id="preset" className="w-full">
                       <SelectValue />
                     </SelectTrigger>

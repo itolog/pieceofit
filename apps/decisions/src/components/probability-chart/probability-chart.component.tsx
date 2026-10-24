@@ -17,7 +17,11 @@ import { labelWidth } from "./utils/label-width";
 import { toChartData } from "./utils/to-chart-data";
 
 // One probability bar per option or level, the model's pick emphasised.
-export const ProbabilityChart = ({ rows, label }: ProbabilityChartProps) => {
+export const ProbabilityChart = ({
+  rows,
+  label,
+  identifiers = false,
+}: ProbabilityChartProps) => {
   const { resolved } = useTheme();
   const { i18n } = useTranslation();
   const palette = CHART_PALETTE[resolved];
@@ -47,7 +51,14 @@ export const ProbabilityChart = ({ rows, label }: ProbabilityChartProps) => {
         axisLeft={{ tickSize: 0, tickPadding: 8 }}
         theme={{
           text: { fontFamily: "inherit", fontSize: 12, fill: palette.ink },
-          axis: { ticks: { text: { fill: palette.ink } } },
+          axis: {
+            ticks: {
+              text: {
+                fill: palette.ink,
+                fontFamily: identifiers ? "var(--font-mono)" : "inherit",
+              },
+            },
+          },
         }}
         layers={["bars", "axes", BarValueLabels]}
         tooltip={ProbabilityTooltip}

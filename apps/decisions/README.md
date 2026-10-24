@@ -64,5 +64,9 @@ enabled for models with the `vision` capability and shared by all questions.
 | Phishing check     | Phishing or not, strongest warning sign, risk, what the filter does              |
 | Model router       | Which model should answer a prompt                                               |
 
-`src/presets/*.json` are request bodies without `model`. List a new one in
-`src/presets/presets.model.ts` to show it in the picker.
+Each preset is a request body without `model`, one file per interface language:
+`src/presets/en/*.json` and `src/presets/uk/*.json`. A translation rewords the state,
+questions, descriptions and levels, but keeps question keys, types and option names —
+those are identifiers the API returns, and a unit test checks every language has the same
+shape. List a new preset in `src/presets/presets.model.ts` to show it in the picker; the
+form loads it in the interface language, and follows a language switch until you edit it.

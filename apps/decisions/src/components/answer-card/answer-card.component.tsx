@@ -46,7 +46,11 @@ export const AnswerCard = ({ name, answer, instructions }: AnswerCardProps) => {
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <p className="font-heading text-3xl font-bold tracking-tight">
+        <p
+          className={`text-3xl font-bold tracking-tight ${
+            // A chosen option is an identifier the API returns, not a word.
+            answer.type === "choice" ? "font-mono" : "font-heading"
+          }`}>
           {answerHeadline(answer, labels)}
         </p>
         {answer.type === "noul" ? (
@@ -64,6 +68,7 @@ export const AnswerCard = ({ name, answer, instructions }: AnswerCardProps) => {
         ) : (
           <ProbabilityChart
             rows={toRows(answer, labels)}
+            identifiers={answer.type === "choice"}
             label={t(
               answer.type === "choice"
                 ? "answer.chartLabelChoice"
